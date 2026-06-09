@@ -1,0 +1,3 @@
+sdk.dir=/path/to/Android/sdk
+DEFAULT_BASE_URL=https://api.example.com/
+DEFAULT_INGEST_PATH=v1/health/ingest

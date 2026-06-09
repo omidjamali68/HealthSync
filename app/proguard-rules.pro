@@ -1,0 +1,5 @@
+-keepattributes *Annotation*, InnerClasses
+-dontwarn kotlinx.serialization.**
+-keep,includedescriptorclasses class com.example.healthsync.**$$serializer { *; }
+-keepclassmembers class com.example.healthsync.** { *** Companion; }
+-keepclasseswithmembers class com.example.healthsync.** { kotlinx.serialization.KSerializer serializer(...); }
