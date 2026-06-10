@@ -5,4 +5,16 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+
+    <debug-overrides>
+        <trust-anchors>
+            <!-- در حالت دیباگ، گواهی‌های نصب شده توسط کاربر (مثل Charles یا Fiddler یا گواهی لوکال) را بپذیر -->
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!-- اجازه عبور ترافیک برای IP امولاتور (اگر خواستید موقتاً به صورت HTTP تست کنید) -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
 </network-security-config>
