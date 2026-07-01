@@ -55,6 +55,10 @@ fun DashboardScreen(
             }
             Button(onClick = vm::syncNow, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sync_now)) }
 
+            OutlinedButton(onClick = vm::sendTestData, modifier = Modifier.fillMaxWidth()) {
+                Text("ارسال دیتای تست (همه پارامترها)")
+            }
+
             Text(stringResource(R.string.recent_activity), style = MaterialTheme.typography.titleMedium)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(s.logs, key = { it.id }) { log ->
