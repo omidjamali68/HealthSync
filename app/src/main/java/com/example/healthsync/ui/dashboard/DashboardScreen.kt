@@ -11,6 +11,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.DateFormat
 import java.util.Date
 
+import androidx.compose.ui.res.stringResource
+import com.example.healthsync.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -24,10 +27,10 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sync dashboard") },
+                title = { Text(stringResource(R.string.sync_dashboard)) },
                 actions = {
-                    TextButton(onClick = onOpenPermissions) { Text("Permissions") }
-                    TextButton(onClick = onOpenSettings) { Text("Settings") }
+                    TextButton(onClick = onOpenPermissions) { Text(stringResource(R.string.permissions_tab)) }
+                    TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings_tab)) }
                 },
             )
         },
@@ -38,20 +41,25 @@ fun DashboardScreen(
         ) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Status", style = MaterialTheme.typography.titleMedium)
-                    Text("Device ID: ${s.deviceId}")
-                    Text("Last successful sync: ${s.lastSuccessAt?.let { df.format(Date(it)) } ?: "never"}")
-                    Text("Pending batches in queue: ${s.queueSize}")
-                    Text("Sync interval: ${s.intervalMinutes} min")
+                    Text(stringResource(R.string.status_label), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.device_id_label, s.deviceId))
+                    Text(
+                        stringResource(
+                            R.string.last_sync_label,
+                            s.lastSuccessAt?.let { df.format(Date(it)) } ?: stringResource(R.string.never)
+                        )
+                    )
+                    Text(stringResource(R.string.pending_batches_label, s.queueSize))
+                    Text(stringResource(R.string.sync_interval_label, s.intervalMinutes))
                 }
             }
-            Button(onClick = vm::syncNow, modifier = Modifier.fillMaxWidth()) { Text("Sync now") }
+            Button(onClick = vm::syncNow, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sync_now)) }
 
-            Text("Recent activity", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.recent_activity), style = MaterialTheme.typography.titleMedium)
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(s.logs, key = { it.id }) { log ->
                     ListItem(
-                        headlineContent = { Text(if (log.success) "Success" else "Failed") },
+                        headlineContent = { Text(stringResource(if (log.success) R.string.success else R.string.failed)) },
                         supportingContent = { Text(log.message) },
                         trailingContent = { Text(df.format(Date(log.timestamp))) },
                     )

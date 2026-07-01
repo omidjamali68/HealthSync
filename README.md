@@ -8,7 +8,7 @@ syncs it to a configurable REST API endpoint over HTTPS.
 
 - Native Kotlin, **MVVM + Repository** architecture.
 - **Jetpack Compose + Material 3** UI.
-- **Health Connect SDK** integration (heart rate, steps).
+- **Health Connect SDK** integration (heart rate, steps, distance, calories).
 - Runtime permission flow with rationale screen.
 - **WorkManager** periodic background sync (configurable interval).
 - **Retrofit + OkHttp** for HTTPS JSON POST, with retry/backoff.
@@ -74,7 +74,7 @@ Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
   "syncedAt": "2026-06-07T10:24:00Z",
   "window": { "from": "2026-06-07T09:00:00Z", "to": "2026-06-07T10:24:00Z" },
   "steps": [
-    { "date": "2026-06-07", "count": 4321 }
+    { "date": "2026-06-07", "count": 4321, "distanceKm": 3.2, "caloriesBurned": 150.5 }
   ],
   "heartRate": [
     { "timestamp": "2026-06-07T10:11:23Z", "bpm": 72 },
@@ -101,6 +101,11 @@ These are exposed via `buildConfigField` in `app/build.gradle.kts` and act only 
 Declared in `AndroidManifest.xml`:
 - `android.permission.health.READ_HEART_RATE`
 - `android.permission.health.READ_STEPS`
+- `android.permission.health.READ_DISTANCE`
+- `android.permission.health.READ_TOTAL_CALORIES_BURNED`
+- `android.permission.health.READ_BLOOD_PRESSURE`
+- `android.permission.health.READ_OXYGEN_SATURATION`
+- `android.permission.health.READ_SLEEP`
 - `android.permission.POST_NOTIFICATIONS` (sync status notification, 13+)
 - Health Connect privacy policy intent filter.
 

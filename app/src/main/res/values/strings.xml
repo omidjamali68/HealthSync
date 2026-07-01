@@ -1,3 +1,47 @@
 <resources>
-    <string name="app_name">HealthSync</string>
+    <string name="app_name">هلث‌سینک</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_title">به هلث‌سینک خوش آمدید</string>
+    <string name="welcome_desc">هلث‌سینک داده‌های ضربان قلب و گام‌های شما را از Android Health Connect خوانده و به‌صورت امن در سرور پیکربندی شده شما بارگذاری می‌کند.</string>
+    <string name="onboarding_points">• داده‌ها فقط به مقصد تعیین شده توسط شما ارسال می‌شوند.\n• توکن API شما در فضای ذخیره‌سازی رمزگذاری شده نگهداری می‌شود.\n• همگام‌سازی در پس‌زمینه و در بازه‌های زمانی انتخابی شما انجام می‌شود.</string>
+    <string name="get_started">شروع کنید</string>
+
+    <!-- Permissions -->
+    <string name="health_connect">هلث کانکت (Health Connect)</string>
+    <string name="health_connect_not_supported">هلث کانکت در این دستگاه پشتیبانی نمی‌شود.</string>
+    <string name="health_connect_update_required">لطفاً اپلیکیشن Health Connect را از پلی استور نصب یا به‌روزرسانی کنید، سپس به اینجا بازگردید.</string>
+    <string name="permissions_explanation">هلث‌سینک برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
+    <string name="all_permissions_granted">تمامی دسترسی‌های لازم داده شده است.</string>
+    <string name="grant_permissions">اعطای دسترسی‌های هلث کانکت</string>
+    <string name="continue_button">ادامه</string>
+
+    <!-- Dashboard -->
+    <string name="sync_dashboard">داشبورد همگام‌سازی</string>
+    <string name="permissions_tab">دسترسی‌ها</string>
+    <string name="settings_tab">تنظیمات</string>
+    <string name="status_label">وضعیت</string>
+    <string name="device_id_label">شناسه دستگاه: %1$s</string>
+    <string name="last_sync_label">آخرین همگام‌سازی موفق: %1$s</string>
+    <string name="never">هرگز</string>
+    <string name="pending_batches_label">دسته‌های در انتظار در صف: %1$d</string>
+    <string name="sync_interval_label">بازه همگام‌سازی: %1$d دقیقه</string>
+    <string name="sync_now">همگام‌سازی اکنون</string>
+    <string name="recent_activity">فعالیت‌های اخیر</string>
+    <string name="success">موفقیت‌آمیز</string>
+    <string name="failed">ناموفق</string>
+
+    <!-- Settings -->
+    <string name="api_configuration">پیکربندی API</string>
+    <string name="base_url">آدرس پایه (Base URL)</string>
+    <string name="ingest_path">مسیر دریافت (Ingest path)</string>
+    <string name="auth_token">توکن امنیتی (Auth token)</string>
+    <string name="device_id">شناسه دستگاه</string>
+    <string name="sync_interval">بازه همگام‌سازی (دقیقه، حداقل ۱۵)</string>
+    <string name="save">ذخیره</string>
+    <string name="save_continue">ذخیره و ادامه</string>
+    <string name="language_selection">زبان</string>
+    <string name="persian">فارسی</string>
+    <string name="english">English</string>
+    <string name="saved_msg">ذخیره شد. همگام‌سازی دوره‌ای برنامه‌ریزی شد.</string>
 </resources>

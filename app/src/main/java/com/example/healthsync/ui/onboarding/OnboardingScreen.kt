@@ -10,6 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.ui.res.stringResource
+import com.example.healthsync.R
+
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
     Scaffold { inner ->
@@ -21,23 +24,20 @@ fun OnboardingScreen(onContinue: () -> Unit) {
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Welcome to HealthSync", style = MaterialTheme.typography.headlineMedium)
+                Text(stringResource(R.string.welcome_title), style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    "HealthSync reads your heart rate and step data from Android Health Connect " +
-                        "and securely uploads it to your configured server.",
+                    stringResource(R.string.welcome_desc),
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
-                    "• Data leaves your device only to the endpoint you configure.\n" +
-                        "• Your API token is stored in encrypted storage.\n" +
-                        "• Sync runs in the background on your chosen interval.",
+                    stringResource(R.string.onboarding_points),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             Button(
                 onClick = onContinue,
                 modifier = Modifier.fillMaxWidth().align(Alignment.End),
-            ) { Text("Get started") }
+            ) { Text(stringResource(R.string.get_started)) }
         }
     }
 }

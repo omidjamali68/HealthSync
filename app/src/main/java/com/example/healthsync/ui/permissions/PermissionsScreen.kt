@@ -13,6 +13,12 @@ import androidx.health.connect.client.PermissionController
 import com.example.healthsync.data.repository.HealthRepository
 import kotlinx.coroutines.launch
 
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.example.healthsync.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionsScreen(
@@ -21,35 +27,47 @@ fun PermissionsScreen(
 ) {
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val contract = remember { PermissionController.createRequestPermissionResultContract() }
-    val launcher = rememberLauncherForActivityResult(contract) { granted ->
-        scope.launch { vm.onPermissionResult(granted.containsAll(vm.required)) }
+    val launcher = rememberLauncherForActivityResult(contract) { _ ->
+        vm.refresh()
     }
 
-    LaunchedEffect(Unit) { vm.refresh() }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                vm.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Health Connect") }) }) { inner ->
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.health_connect)) }) }) { inner ->
         Column(
             modifier = Modifier.padding(inner).padding(24.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             when (state.availability) {
                 HealthRepository.Availability.NotSupported ->
-                    Text("Health Connect is not supported on this device.")
+                    Text(stringResource(R.string.health_connect_not_supported))
                 HealthRepository.Availability.ProviderUpdateRequired ->
-                    Text("Please install or update the Health Connect app from Play Store, then return here.")
+                    Text(stringResource(R.string.health_connect_update_required))
                 HealthRepository.Availability.Available -> {
                     Text(
-                        "HealthSync needs permission to read:\n• Heart rate samples\n• Daily steps",
+                        stringResource(R.string.permissions_explanation),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                     if (state.granted) {
-                        Text("All required permissions are granted.", color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.all_permissions_granted), color = MaterialTheme.colorScheme.primary)
                     } else {
                         Button(
                             onClick = { launcher.launch(vm.required) },
                             modifier = Modifier.fillMaxWidth(),
-                        ) { Text("Grant Health Connect permissions") }
+                        ) { Text(stringResource(R.string.grant_permissions)) }
                     }
                 }
             }
@@ -58,7 +76,7 @@ fun PermissionsScreen(
                 onClick = onContinue,
                 enabled = state.granted || state.availability != HealthRepository.Availability.Available,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Continue") }
+            ) { Text(stringResource(R.string.continue_button)) }
         }
     }
 }

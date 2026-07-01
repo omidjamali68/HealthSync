@@ -39,8 +39,11 @@ class SyncWorker @AssistedInject constructor(
 
         val hr = health.readHeartRate(from, now)
         val steps = health.readDailySteps(from, now)
+        val bp = health.readBloodPressure(from, now)
+        val bo = health.readBloodOxygen(from, now)
+        val sleep = health.readSleepSessions(from, now)
 
-        if (hr.isNotEmpty() || steps.isNotEmpty()) {
+        if (hr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
             val payload = SyncPayload(
                 deviceId = config.deviceId,
                 syncedAt = DateTimeFormatter.ISO_INSTANT.format(now),
@@ -50,6 +53,9 @@ class SyncWorker @AssistedInject constructor(
                 ),
                 steps = steps,
                 heartRate = hr,
+                bloodPressure = bp,
+                bloodOxygen = bo,
+                sleep = sleep,
             )
             sync.enqueue(payload)
         }

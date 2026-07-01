@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">HealthSync</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_title">Welcome to HealthSync</string>
+    <string name="welcome_desc">HealthSync reads your heart rate and step data from Android Health Connect and securely uploads it to your configured server.</string>
+    <string name="onboarding_points">• Data leaves your device only to the endpoint you configure.\n• Your API token is stored in encrypted storage.\n• Sync runs in the background on your chosen interval.</string>
+    <string name="get_started">Get started</string>
+
+    <!-- Permissions -->
+    <string name="health_connect">Health Connect</string>
+    <string name="health_connect_not_supported">Health Connect is not supported on this device.</string>
+    <string name="health_connect_update_required">Please install or update the Health Connect app from Play Store, then return here.</string>
+    <string name="permissions_explanation">HealthSync needs permission to read:\n• Heart rate samples\n• Daily steps\n• Blood pressure\n• Blood oxygen\n• Sleep sessions</string>
+    <string name="all_permissions_granted">All required permissions are granted.</string>
+    <string name="grant_permissions">Grant Health Connect permissions</string>
+    <string name="continue_button">Continue</string>
+
+    <!-- Dashboard -->
+    <string name="sync_dashboard">Sync dashboard</string>
+    <string name="permissions_tab">Permissions</string>
+    <string name="settings_tab">Settings</string>
+    <string name="status_label">Status</string>
+    <string name="device_id_label">Device ID: %1$s</string>
+    <string name="last_sync_label">Last successful sync: %1$s</string>
+    <string name="never">never</string>
+    <string name="pending_batches_label">Pending batches in queue: %1$d</string>
+    <string name="sync_interval_label">Sync interval: %1$d min</string>
+    <string name="sync_now">Sync now</string>
+    <string name="recent_activity">Recent activity</string>
+    <string name="success">Success</string>
+    <string name="failed">Failed</string>
+
+    <!-- Settings -->
+    <string name="api_configuration">API configuration</string>
+    <string name="base_url">Base URL</string>
+    <string name="ingest_path">Ingest path</string>
+    <string name="auth_token">Auth token</string>
+    <string name="device_id">Device ID</string>
+    <string name="sync_interval">Sync interval (minutes, min 15)</string>
+    <string name="save">Save</string>
+    <string name="save_continue">Save &amp; continue</string>
+    <string name="language_selection">Language</string>
+    <string name="persian">Persian</string>
+    <string name="english">English</string>
+    <string name="saved_msg">Saved. Periodic sync scheduled.</string>
+</resources>

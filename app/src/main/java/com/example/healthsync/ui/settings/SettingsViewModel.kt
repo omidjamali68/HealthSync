@@ -8,13 +8,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+
 data class SettingsUiState(
     val baseUrl: String = "",
     val ingestPath: String = "",
     val token: String = "",
     val deviceId: String = "",
     val intervalMinutes: String = "15",
-    val savedMessage: String? = null,
+    val isSaved: Boolean = false,
+    val language: String = "fa",
 )
 
 @HiltViewModel
@@ -30,15 +34,21 @@ class SettingsViewModel @Inject constructor(
             token = config.authToken,
             deviceId = config.deviceId,
             intervalMinutes = config.syncIntervalMinutes.toString(),
+            language = AppCompatDelegate.getApplicationLocales().toLanguageTags().let { if (it.isEmpty()) "fa" else it },
         )
     )
     val state = _state.asStateFlow()
 
-    fun setBaseUrl(v: String) { _state.value = _state.value.copy(baseUrl = v, savedMessage = null) }
-    fun setIngestPath(v: String) { _state.value = _state.value.copy(ingestPath = v, savedMessage = null) }
-    fun setToken(v: String) { _state.value = _state.value.copy(token = v, savedMessage = null) }
-    fun setDeviceId(v: String) { _state.value = _state.value.copy(deviceId = v, savedMessage = null) }
-    fun setInterval(v: String) { _state.value = _state.value.copy(intervalMinutes = v.filter(Char::isDigit), savedMessage = null) }
+    fun setBaseUrl(v: String) { _state.value = _state.value.copy(baseUrl = v, isSaved = false) }
+    fun setIngestPath(v: String) { _state.value = _state.value.copy(ingestPath = v, isSaved = false) }
+    fun setToken(v: String) { _state.value = _state.value.copy(token = v, isSaved = false) }
+    fun setDeviceId(v: String) { _state.value = _state.value.copy(deviceId = v, isSaved = false) }
+    fun setInterval(v: String) { _state.value = _state.value.copy(intervalMinutes = v.filter(Char::isDigit), isSaved = false) }
+    fun setLanguage(lang: String) {
+        _state.value = _state.value.copy(language = lang)
+        val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(lang)
+        AppCompatDelegate.setApplicationLocales(appLocale)
+    }
 
     fun save() {
         val s = _state.value
@@ -49,6 +59,6 @@ class SettingsViewModel @Inject constructor(
         config.syncIntervalMinutes = s.intervalMinutes.toLongOrNull()?.coerceAtLeast(15) ?: 15
         config.onboardingComplete = true
         scheduler.ensureScheduled()
-        _state.value = s.copy(savedMessage = "Saved. Periodic sync scheduled.")
+        _state.value = s.copy(isSaved = true)
     }
 }
