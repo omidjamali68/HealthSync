@@ -1,21 +1,28 @@
 package com.example.healthsync.data.repository
 
+import com.example.healthsync.data.local.SecureConfigStore
 import com.example.healthsync.data.remote.AuthApi
 import com.example.healthsync.domain.model.LoginResponseDto
 import com.example.healthsync.domain.model.RegisterOrLoginDto
 import com.example.healthsync.domain.model.ResponseDto
+import com.example.healthsync.domain.model.SendCodeResponse
+import com.example.healthsync.util.ApiConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AuthRepository @Inject constructor(
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    private val config: SecureConfigStore
 ) {
-    suspend fun sendVerificationCode(mobile: String): Result<ResponseDto<Unit>> {
+    suspend fun sendVerificationCode(mobile: String): Result<ResponseDto<SendCodeResponse>> {
         return try {
-            val response = authApi.sendVerificationCode(mobile)
+            val base = config.baseUrl.trimEnd('/')
+            val url = "$base/${ApiConfig.AUTH_SEND_CODE}/$mobile"
+            val response = authApi.sendVerificationCode(url)
             if (response.isSuccessful) {
-                Result.success(response.body() ?: ResponseDto(true, null, Unit))
+                val body = response.body() ?: throw Exception("Empty response body")
+                Result.success(body)
             } else {
                 Result.failure(Exception("Failed to send code: ${response.code()}"))
             }
@@ -26,7 +33,9 @@ class AuthRepository @Inject constructor(
 
     suspend fun registerOrLogin(userName: String, code: Long): Result<ResponseDto<LoginResponseDto>> {
         return try {
-            val response = authApi.registerOrLogin(RegisterOrLoginDto(userName, code))
+            val base = config.baseUrl.trimEnd('/')
+            val url = "$base/${ApiConfig.AUTH_LOGIN}"
+            val response = authApi.registerOrLogin(url, RegisterOrLoginDto(userName, code))
             if (response.isSuccessful) {
                 Result.success(response.body() ?: throw Exception("Empty response"))
             } else {

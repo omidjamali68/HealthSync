@@ -77,8 +77,27 @@ Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
     { "date": "2026-06-07", "count": 4321, "distanceKm": 3.2, "caloriesBurned": 150.5 }
   ],
   "heartRate": [
-    { "timestamp": "2026-06-07T10:11:23Z", "bpm": 72 },
-    { "timestamp": "2026-06-07T10:12:23Z", "bpm": 74 }
+    { "timestamp": "2026-06-07T10:11:23Z", "bpm": 72 }
+  ],
+  "bloodPressure": [
+    { "timestamp": "2026-06-07T09:45:00Z", "systolic": 120.0, "diastolic": 80.0 }
+  ],
+  "bloodOxygen": [
+    { "timestamp": "2026-06-07T09:46:00Z", "percentage": 98.5 }
+  ],
+  "sleep": [
+    {
+      "startTime": "2026-06-06T23:00:00Z",
+      "endTime": "2026-06-07T07:00:00Z",
+      "totalDurationMinutes": 480,
+      "lightSleepMinutes": 300,
+      "deepSleepMinutes": 120,
+      "remSleepMinutes": 40,
+      "awakeMinutes": 20,
+      "stages": [
+        { "startTime": "2026-06-06T23:00:00Z", "endTime": "2026-06-06T23:30:00Z", "stage": 4, "durationMinutes": 30 }
+      ]
+    }
   ]
 }
 ```

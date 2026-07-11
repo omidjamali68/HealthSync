@@ -2,33 +2,40 @@ package com.example.healthsync.domain.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class RegisterOrLoginDto(
-    @SerialName("UserName")
+    @SerialName("userName")
     val userName: String,
-    @SerialName("VerificationCode")
+    @SerialName("verificationCode")
     val verificationCode: Long
 )
 
 @Serializable
 data class LoginResponseDto(
-    @SerialName("Id")
+    @SerialName("id")
     val id: String,
-    @SerialName("Mobile")
+    @SerialName("mobile")
     val mobile: String,
-    @SerialName("TenantId")
+    @SerialName("tenantId")
     val tenantId: String,
-    @SerialName("Token")
+    @SerialName("token")
     val token: String
 )
 
 @Serializable
+data class SendCodeResponse(
+    @SerialName("isUserRegistered")
+    val isUserRegistered: JsonElement? = null
+)
+
+@Serializable
 data class ResponseDto<T>(
-    @SerialName("IsSuccess")
+    @SerialName("isSuccess")
     val isSuccess: Boolean,
-    @SerialName("Message")
+    @SerialName("message")
     val message: String? = null,
-    @SerialName("Data")
+    @SerialName("data")
     val data: T? = null
 )

@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.example.healthsync.BuildConfig
+import com.example.healthsync.util.ApiConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
@@ -32,11 +32,11 @@ class SecureConfigStore @Inject constructor(
     }
 
     var baseUrl: String
-        get() = prefs.getString(KEY_BASE_URL, BuildConfig.DEFAULT_BASE_URL) ?: BuildConfig.DEFAULT_BASE_URL
+        get() = prefs.getString(KEY_BASE_URL, ApiConfig.DEFAULT_BASE_URL) ?: ApiConfig.DEFAULT_BASE_URL
         set(value) = prefs.edit().putString(KEY_BASE_URL, value).apply()
 
     var ingestPath: String
-        get() = prefs.getString(KEY_INGEST_PATH, BuildConfig.DEFAULT_INGEST_PATH) ?: BuildConfig.DEFAULT_INGEST_PATH
+        get() = prefs.getString(KEY_INGEST_PATH, ApiConfig.DEFAULT_INGEST_PATH) ?: ApiConfig.DEFAULT_INGEST_PATH
         set(value) = prefs.edit().putString(KEY_INGEST_PATH, value).apply()
 
     var authToken: String

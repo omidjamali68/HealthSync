@@ -8,6 +8,7 @@ import com.example.healthsync.data.local.AppDatabase
 import com.example.healthsync.data.local.SyncLogDao
 import com.example.healthsync.data.local.SyncQueueDao
 import com.example.healthsync.data.remote.HealthApi
+import com.example.healthsync.util.ApiConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,7 +48,7 @@ object AppModule {
     @Provides @Singleton
     fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit =
         Retrofit.Builder()
-            .baseUrl(com.example.healthsync.BuildConfig.DEFAULT_BASE_URL)
+            .baseUrl(ApiConfig.DEFAULT_BASE_URL)
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
