@@ -4,12 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.healthsync.ui.auth.AuthScreen
 import com.example.healthsync.ui.dashboard.DashboardScreen
 import com.example.healthsync.ui.onboarding.OnboardingScreen
 import com.example.healthsync.ui.permissions.PermissionsScreen
 import com.example.healthsync.ui.settings.SettingsScreen
 
 object Routes {
+    const val AUTH = "auth"
     const val ONBOARDING = "onboarding"
     const val PERMISSIONS = "permissions"
     const val SETTINGS = "settings"
@@ -17,8 +19,15 @@ object Routes {
 }
 
 @Composable
-fun NavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Routes.ONBOARDING) {
+fun NavGraph(navController: NavHostController, startDestination: String = Routes.AUTH) {
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable(Routes.AUTH) {
+            AuthScreen(onLoginSuccess = {
+                navController.navigate(Routes.ONBOARDING) {
+                    popUpTo(Routes.AUTH) { inclusive = true }
+                }
+            })
+        }
         composable(Routes.ONBOARDING) {
             OnboardingScreen(onContinue = { navController.navigate(Routes.PERMISSIONS) })
         }

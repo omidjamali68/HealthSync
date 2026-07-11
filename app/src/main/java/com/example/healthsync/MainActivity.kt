@@ -14,12 +14,19 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.healthsync.ui.NavGraph
+import com.example.healthsync.ui.Routes
 import com.example.healthsync.ui.theme.HealthSyncTheme
+import com.example.healthsync.util.SessionManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Force Persian on first run if no preference is saved
         val prefs = getSharedPreferences("app_settings", MODE_PRIVATE)
@@ -43,7 +50,12 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        NavGraph(navController = navController)
+                        val startDestination = if (sessionManager.isLoggedIn()) {
+                            Routes.DASHBOARD
+                        } else {
+                            Routes.AUTH
+                        }
+                        NavGraph(navController = navController, startDestination = startDestination)
                     }
                 }
             }

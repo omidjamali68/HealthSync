@@ -2,6 +2,8 @@ package com.example.healthsync.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.healthsync.data.remote.AuthApi
+import com.example.healthsync.data.remote.AuthInterceptor
 import com.example.healthsync.data.local.AppDatabase
 import com.example.healthsync.data.local.SyncLogDao
 import com.example.healthsync.data.local.SyncQueueDao
@@ -31,12 +33,13 @@ object AppModule {
     }
 
     @Provides @Singleton
-    fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttp(authInterceptor: AuthInterceptor): OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(authInterceptor)
         .addInterceptor(HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
+            level = HttpLoggingInterceptor.Level.BODY
         })
         .retryOnConnectionFailure(true)
         .build()
@@ -44,11 +47,13 @@ object AppModule {
     @Provides @Singleton
     fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit =
         Retrofit.Builder()
-            // Base URL is overridden per-request via @Url. This placeholder is required by Retrofit.
-            .baseUrl("https://placeholder.invalid/")
+            .baseUrl(com.example.healthsync.BuildConfig.DEFAULT_BASE_URL)
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
+
+    @Provides @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi = retrofit.create(AuthApi::class.java)
 
     @Provides @Singleton
     fun provideHealthApi(retrofit: Retrofit): HealthApi = retrofit.create(HealthApi::class.java)
