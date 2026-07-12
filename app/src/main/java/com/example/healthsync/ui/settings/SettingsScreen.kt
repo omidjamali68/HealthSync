@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -28,7 +27,7 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.api_configuration), color = Color.White) },
+                title = { Text("تنظیمات", color = Color.White) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
@@ -41,35 +40,24 @@ fun SettingsScreen(
                 .padding(20.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            OutlinedTextField(
-                value = s.baseUrl, onValueChange = vm::setBaseUrl,
-                label = { Text(stringResource(R.string.base_url)) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+            Text(
+                text = "تنظیمات همگام‌سازی",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
             )
-            OutlinedTextField(
-                value = s.ingestPath, onValueChange = vm::setIngestPath,
-                label = { Text(stringResource(R.string.ingest_path)) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = s.token, onValueChange = vm::setToken,
-                label = { Text(stringResource(R.string.auth_token)) }, singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = s.deviceId, onValueChange = vm::setDeviceId,
-                label = { Text(stringResource(R.string.device_id)) }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            
             OutlinedTextField(
                 value = s.intervalMinutes, onValueChange = vm::setInterval,
-                label = { Text(stringResource(R.string.sync_interval)) }, singleLine = true,
+                label = { Text(stringResource(R.string.sync_interval)) },
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
             )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             Text(stringResource(R.string.language_selection), style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
