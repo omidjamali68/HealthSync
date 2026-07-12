@@ -15,6 +15,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import com.example.healthsync.R
 
+import androidx.compose.ui.graphics.Color
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -23,7 +25,16 @@ fun SettingsScreen(
 ) {
     val s by vm.state.collectAsState()
 
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.api_configuration)) }) }) { inner ->
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(stringResource(R.string.api_configuration), color = Color.White) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    ) { inner ->
         Column(
             modifier = Modifier
                 .padding(inner)

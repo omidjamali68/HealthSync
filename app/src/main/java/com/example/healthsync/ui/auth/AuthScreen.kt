@@ -1,5 +1,6 @@
 package com.example.healthsync.ui.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -31,58 +32,104 @@ fun AuthScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        if (!uiState.isCodeSent) {
-            LoginStage(uiState, viewModel)
-        } else {
-            VerificationStage(uiState, viewModel)
+        // Green Header like the website
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "طب دیتا",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall
+            )
         }
 
-        uiState.error?.let {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large,
+                colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (!uiState.isCodeSent) {
+                        LoginStage(uiState, viewModel)
+                    } else {
+                        VerificationStage(uiState, viewModel)
+                    }
+                }
+            }
 
-        if (uiState.isLoading) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator()
+            uiState.error?.let {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
+
+            if (uiState.isLoading) {
+                Spacer(modifier = Modifier.height(16.dp))
+                CircularProgressIndicator()
+            }
         }
     }
 }
 
 @Composable
 fun LoginStage(state: AuthUiState, viewModel: AuthViewModel) {
-    Text(text = "ورود به اپلیکیشن", style = MaterialTheme.typography.headlineMedium)
+    Text(
+        text = "ورود به اپلیکیشن",
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.primary
+    )
     Spacer(modifier = Modifier.height(32.dp))
     OutlinedTextField(
         value = state.mobileNumber,
         onValueChange = viewModel::onMobileNumberChange,
         label = { Text("شماره موبایل") },
-        placeholder = { Text("09177870290") },
+        placeholder = { Text("09175001122", color = Color.Gray) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         modifier = Modifier.fillMaxWidth(),
-        singleLine = true
+        singleLine = true,
+        shape = MaterialTheme.shapes.medium
     )
     Spacer(modifier = Modifier.height(24.dp))
     Button(
         onClick = viewModel::sendCode,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = !state.isLoading && state.mobileNumber.length == 11
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        enabled = !state.isLoading && state.mobileNumber.length == 11,
+        shape = MaterialTheme.shapes.medium
     ) {
-        Text("دریافت کد تایید")
+        Text("دریافت کد تایید", style = MaterialTheme.typography.labelLarge)
     }
 }
 
 @Composable
 fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
-    Text(text = "کد تایید را وارد کنید", style = MaterialTheme.typography.headlineMedium)
+    Text(
+        text = "کد تایید را وارد کنید",
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.primary
+    )
     Spacer(modifier = Modifier.height(16.dp))
     Text(
         text = "کد به شماره ${state.mobileNumber} ارسال شد",
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodyMedium,
+        color = Color.Gray
     )
     Spacer(modifier = Modifier.height(32.dp))
 
@@ -104,14 +151,15 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
                     }
                 },
                 modifier = Modifier
-                    .width(48.dp)
+                    .width(45.dp)
                     .focusRequester(focusRequesters[index]),
                 textStyle = LocalTextStyle.current.copy(
                     textAlign = TextAlign.Center,
-                    fontSize = 20.sp
+                    fontSize = 18.sp
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true
+                singleLine = true,
+                shape = MaterialTheme.shapes.small
             )
         }
     }
@@ -122,23 +170,24 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
     val seconds = state.timerSeconds % 60
     Text(
         text = String.format("%02d:%02d", minutes, seconds),
-        style = MaterialTheme.typography.headlineSmall,
-        color = if (state.timerSeconds > 0) MaterialTheme.colorScheme.primary else Color.Red
+        style = MaterialTheme.typography.titleMedium,
+        color = if (state.timerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
     )
 
     Spacer(modifier = Modifier.height(24.dp))
 
     Button(
         onClick = viewModel::login,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = !state.isLoading && state.verificationCode.all { it.isNotEmpty() }
+        modifier = Modifier.fillMaxWidth().height(50.dp),
+        enabled = !state.isLoading && state.verificationCode.all { it.isNotEmpty() },
+        shape = MaterialTheme.shapes.medium
     ) {
         Text("تایید و ورود")
     }
 
     if (state.timerSeconds == 0) {
         TextButton(onClick = viewModel::sendCode) {
-            Text("ارسال مجدد کد")
+            Text("ارسال مجدد کد", color = MaterialTheme.colorScheme.secondary)
         }
     }
 }
