@@ -41,13 +41,13 @@ class SyncScheduler @Inject constructor(
 
     fun runNow() {
         val req = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.SECONDS)
             .build()
         wm.enqueueUniqueWork(SyncWorker.ONE_SHOT, ExistingWorkPolicy.REPLACE, req)
+    }
+
+    fun cancel() {
+        wm.cancelUniqueWork(SyncWorker.UNIQUE_NAME)
+        wm.cancelUniqueWork(SyncWorker.ONE_SHOT)
     }
 }

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.healthsync.util.ApiConfig
+import com.example.healthsync.util.SessionManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
 import javax.inject.Inject
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class SecureConfigStore @Inject constructor(
     @ApplicationContext context: Context,
+    private val sessionManager: SessionManager,
 ) {
     private val prefs: SharedPreferences = run {
         val masterKey = MasterKey.Builder(context)
@@ -40,8 +42,8 @@ class SecureConfigStore @Inject constructor(
         set(value) = prefs.edit().putString(KEY_INGEST_PATH, value).apply()
 
     var authToken: String
-        get() = prefs.getString(KEY_TOKEN, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_TOKEN, value).apply()
+        get() = sessionManager.getToken() ?: ""
+        set(value) = sessionManager.saveToken(value)
 
     var syncIntervalMinutes: Long
         get() = prefs.getLong(KEY_INTERVAL, 15L)

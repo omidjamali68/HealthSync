@@ -3,6 +3,7 @@ package com.example.healthsync.ui.settings
 import androidx.lifecycle.ViewModel
 import com.example.healthsync.data.local.SecureConfigStore
 import com.example.healthsync.sync.SyncScheduler
+import com.example.healthsync.util.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,7 @@ data class SettingsUiState(
 class SettingsViewModel @Inject constructor(
     private val config: SecureConfigStore,
     private val scheduler: SyncScheduler,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -58,7 +60,21 @@ class SettingsViewModel @Inject constructor(
         config.deviceId = s.deviceId.trim().ifBlank { config.deviceId }
         config.syncIntervalMinutes = s.intervalMinutes.toLongOrNull()?.coerceAtLeast(15) ?: 15
         config.onboardingComplete = true
+        
+        // Ensure session manager is also in sync if token was manually changed
+        if (s.token.isNotBlank()) {
+            sessionManager.saveToken(s.token.trim())
+        }
+        
         scheduler.ensureScheduled()
         _state.value = s.copy(isSaved = true)
+    }
+
+    fun logout() {
+        sessionManager.clear()
+        config.authToken = ""
+        config.onboardingComplete = false
+        // Stop the scheduler
+        scheduler.cancel()
     }
 }

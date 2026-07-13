@@ -17,11 +17,16 @@ import java.util.Date
 import androidx.compose.ui.res.stringResource
 import com.example.healthsync.R
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.ExitToApp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     onOpenSettings: () -> Unit,
     onOpenPermissions: () -> Unit,
+    onLogout: () -> Unit,
     vm: DashboardViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsState()
@@ -31,6 +36,18 @@ fun DashboardScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.sync_dashboard), color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        vm.logout()
+                        onLogout()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = stringResource(R.string.logout),
+                            tint = Color.White
+                        )
+                    }
+                },
                 actions = {
                     TextButton(onClick = onOpenPermissions) { Text(stringResource(R.string.permissions_tab), color = Color.White) }
                     TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings_tab), color = Color.White) }
@@ -88,6 +105,13 @@ fun DashboardScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Text("ارسال دیتای تست (همه پارامترها)")
+            }
+
+            TextButton(
+                onClick = vm::clearQueue,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("پاکسازی صف انتظار", color = MaterialTheme.colorScheme.error)
             }
 
             Text(

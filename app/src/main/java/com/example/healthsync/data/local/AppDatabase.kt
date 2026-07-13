@@ -43,6 +43,9 @@ interface SyncQueueDao {
 
     @Query("SELECT COUNT(*) FROM sync_queue")
     fun queueSize(): Flow<Int>
+
+    @Query("DELETE FROM sync_queue")
+    suspend fun clearAll()
 }
 
 @Dao

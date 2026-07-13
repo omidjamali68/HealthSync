@@ -44,4 +44,7 @@
     <string name="persian">فارسی</string>
     <string name="english">English</string>
     <string name="saved_msg">ذخیره شد. همگام‌سازی دوره‌ای برنامه‌ریزی شد.</string>
+    <string name="logout">خروج از حساب کاربری</string>
+    <string name="logout_confirm">آیا مطمئن هستید که می‌خواهید خارج شوید؟</string>
+    <string name="account_management">مدیریت حساب</string>
 </resources>

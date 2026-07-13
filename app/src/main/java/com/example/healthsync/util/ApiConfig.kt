@@ -6,7 +6,7 @@ package com.example.healthsync.util
  */
 object ApiConfig {
     // Change this to your server's base URL
-    const val DEFAULT_BASE_URL = "http://10.0.2.2:5000"
+    const val DEFAULT_BASE_URL = "http://10.12.65.99:5000"
 
     // Ingest endpoint path
     const val DEFAULT_INGEST_PATH = "api/health-syncs"

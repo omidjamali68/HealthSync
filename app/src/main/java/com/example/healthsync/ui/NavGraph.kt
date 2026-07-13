@@ -35,12 +35,24 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
             PermissionsScreen(onContinue = { navController.navigate(Routes.SETTINGS) })
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen(onContinue = { navController.navigate(Routes.DASHBOARD) })
+            SettingsScreen(
+                onContinue = { navController.navigate(Routes.DASHBOARD) },
+                onLogout = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenPermissions = { navController.navigate(Routes.PERMISSIONS) },
+                onLogout = {
+                    navController.navigate(Routes.AUTH) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }

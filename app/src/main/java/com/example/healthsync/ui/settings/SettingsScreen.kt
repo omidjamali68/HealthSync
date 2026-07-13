@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun SettingsScreen(
     onContinue: () -> Unit,
+    onLogout: () -> Unit,
     vm: SettingsViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsState()
@@ -83,6 +84,28 @@ fun SettingsScreen(
                     onClick = { vm.save(); onContinue() },
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.save_continue)) }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.account_management),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+
+            Button(
+                onClick = { 
+                    vm.logout()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(stringResource(R.string.logout), color = Color.White)
             }
         }
     }
