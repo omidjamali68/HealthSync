@@ -45,36 +45,41 @@ class SyncWorker @AssistedInject constructor(
             return Result.retry()
         }
 
-        val now = Instant.now()
-        val from = now.minus(config.syncIntervalMinutes.coerceAtLeast(15), ChronoUnit.MINUTES)
-        Log.d("SyncWorker", "Reading data from $from to $now")
+        val isRetry = runAttemptCount > 0
+        if (!isRetry) {
+            val now = Instant.now()
+            val from = now.minus(config.syncIntervalMinutes.coerceAtLeast(15), ChronoUnit.MINUTES)
+            Log.d("SyncWorker", "Reading data from $from to $now")
 
-        val hr = health.readHeartRate(from, now)
-        val steps = health.readDailySteps(from, now)
-        val bp = health.readBloodPressure(from, now)
-        val bo = health.readBloodOxygen(from, now)
-        val sleep = health.readSleepSessions(from, now)
+            val hr = health.readHeartRate(from, now)
+            val steps = health.readDailySteps(from, now)
+            val bp = health.readBloodPressure(from, now)
+            val bo = health.readBloodOxygen(from, now)
+            val sleep = health.readSleepSessions(from, now)
 
-        Log.d("SyncWorker", "Data found: HR=${hr.size}, Steps=${steps.size}, BP=${bp.size}, BO=${bo.size}, Sleep=${sleep.size}")
+            Log.d("SyncWorker", "Data found: HR=${hr.size}, Steps=${steps.size}, BP=${bp.size}, BO=${bo.size}, Sleep=${sleep.size}")
 
-        if (hr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
-            val payload = SyncPayload(
-                deviceId = config.deviceId,
-                syncedAt = DateTimeFormatter.ISO_INSTANT.format(now),
-                window = SyncWindow(
-                    from = DateTimeFormatter.ISO_INSTANT.format(from),
-                    to = DateTimeFormatter.ISO_INSTANT.format(now),
-                ),
-                steps = steps,
-                heartRate = hr,
-                bloodPressure = bp,
-                bloodOxygen = bo,
-                sleep = sleep,
-            )
-            sync.enqueue(payload)
-            Log.d("SyncWorker", "Payload enqueued")
+            if (hr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
+                val payload = SyncPayload(
+                    deviceId = config.deviceId,
+                    syncedAt = DateTimeFormatter.ISO_INSTANT.format(now),
+                    window = SyncWindow(
+                        from = DateTimeFormatter.ISO_INSTANT.format(from),
+                        to = DateTimeFormatter.ISO_INSTANT.format(now),
+                    ),
+                    steps = steps,
+                    heartRate = hr,
+                    bloodPressure = bp,
+                    bloodOxygen = bo,
+                    sleep = sleep,
+                )
+                sync.enqueue(payload)
+                Log.d("SyncWorker", "Payload enqueued")
+            } else {
+                Log.d("SyncWorker", "No new data to enqueue")
+            }
         } else {
-            Log.d("SyncWorker", "No new data to enqueue")
+            Log.d("SyncWorker", "Retry attempt $runAttemptCount: skipping data collection to avoid duplicates")
         }
 
         Log.d("SyncWorker", "Draining queue...")

@@ -9,6 +9,8 @@ import com.example.healthsync.data.local.SyncQueueDao
 import com.example.healthsync.data.remote.HealthApi
 import com.example.healthsync.domain.model.SyncPayload
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +23,8 @@ class SyncRepository @Inject constructor(
     private val config: SecureConfigStore,
     private val json: Json,
 ) {
+    private val drainMutex = Mutex()
+
     val queueSize: Flow<Int> = queueDao.queueSize()
     val recentLogs: Flow<List<SyncLogEntity>> = logDao.recent()
     val lastSuccess: Flow<SyncLogEntity?> = logDao.lastSuccess()
@@ -43,7 +47,7 @@ class SyncRepository @Inject constructor(
      * Drain queued batches. Returns true if everything was sent.
      * Failed batches are kept and their attempt count is incremented.
      */
-    suspend fun drainQueue(): Boolean {
+    suspend fun drainQueue(): Boolean = drainMutex.withLock {
         Log.d("SyncRepository", "drainQueue started")
         var allOk = true
         while (true) {
@@ -56,8 +60,9 @@ class SyncRepository @Inject constructor(
                 queueDao.delete(batch.id)
                 continue
             }
-            val ok = postPayload(payload)
-            if (ok) {
+            
+            val result = postPayloadWithResult(payload)
+            if (result.isSuccess) {
                 Log.d("SyncRepository", "Batch ${batch.id} sent successfully")
                 queueDao.delete(batch.id)
                 logDao.insert(
@@ -69,41 +74,79 @@ class SyncRepository @Inject constructor(
                     )
                 )
             } else {
-                Log.e("SyncRepository", "Failed to send batch ${batch.id}")
-                queueDao.markFailed(batch.id, "HTTP error or network failure")
-                logDao.insert(
-                    SyncLogEntity(
-                        timestamp = System.currentTimeMillis(),
-                        success = false,
-                        message = "Failed batch ${batch.id} (attempt ${batch.attempts + 1})",
-                        itemsSent = 0,
+                val errorMsg = result.exceptionOrNull()?.message ?: "HTTP ${result.statusCode}"
+                val isPermanent = result.isPermanentFailure()
+                
+                if (isPermanent) {
+                    Log.e("SyncRepository", "Permanent failure for batch ${batch.id}: $errorMsg")
+                    // It's a 4xx error (not 429), no point in retrying this batch.
+                    queueDao.delete(batch.id)
+                    logDao.insert(
+                        SyncLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            success = false,
+                            message = "Dropped bad batch ${batch.id}: $errorMsg",
+                            itemsSent = 0,
+                        )
                     )
-                )
-                allOk = false
-                break // WorkManager will retry with backoff
+                } else {
+                    Log.e("SyncRepository", "Failed to send batch ${batch.id}: $errorMsg")
+                    queueDao.markFailed(batch.id, errorMsg)
+                    logDao.insert(
+                        SyncLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            success = false,
+                            message = "Failed batch ${batch.id} (attempt ${batch.attempts + 1}): $errorMsg",
+                            itemsSent = 0,
+                        )
+                    )
+                    allOk = false
+                    break // WorkManager will retry with backoff
+                }
             }
         }
         Log.d("SyncRepository", "drainQueue finished, allOk=$allOk")
-        return allOk
+        return@withLock allOk
     }
 
-    private suspend fun postPayload(payload: SyncPayload): Boolean {
+    private data class SyncResult(
+        val isSuccess: Boolean,
+        val statusCode: Int = 0,
+        val exception: Throwable? = null
+    ) {
+        fun isPermanentFailure(): Boolean {
+            if (exception != null) return false // Network errors are not permanent
+            return statusCode in 400..499 && statusCode != 429
+        }
+        fun exceptionOrNull() = exception
+    }
+
+    private suspend fun postPayloadWithResult(payload: SyncPayload): SyncResult {
         val base = config.baseUrl.trimEnd('/')
         val path = config.ingestPath.trimStart('/')
         val url = "$base/$path"
         val token = config.authToken
         if (token.isBlank()) {
             Log.e("SyncRepository", "postPayload failed: Auth token is blank")
-            return false
+            return SyncResult(false, exception = IllegalStateException("No auth token"))
         }
+        
         Log.d("SyncRepository", "Posting payload to $url")
-        return runCatching {
+        return try {
             val resp = api.ingest(url, "Bearer $token", payload)
             Log.d("SyncRepository", "Response code: ${resp.code()}")
-            resp.isSuccessful
-        }.getOrElse { e ->
+            if (resp.isSuccessful) {
+                SyncResult(true, resp.code())
+            } else {
+                SyncResult(false, resp.code())
+            }
+        } catch (e: Exception) {
             Log.e("SyncRepository", "postPayload exception: ${e.message}", e)
-            false
+            SyncResult(false, exception = e)
         }
+    }
+
+    private suspend fun postPayload(payload: SyncPayload): Boolean {
+        return postPayloadWithResult(payload).isSuccess
     }
 }
