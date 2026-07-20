@@ -13,6 +13,7 @@ import com.example.healthsync.domain.model.SyncWindow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Instant
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -60,12 +61,13 @@ class SyncWorker @AssistedInject constructor(
             Log.d("SyncWorker", "Data found: HR=${hr.size}, Steps=${steps.size}, BP=${bp.size}, BO=${bo.size}, Sleep=${sleep.size}")
 
             if (hr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
+                val zone = ZoneId.systemDefault()
                 val payload = SyncPayload(
                     deviceId = config.deviceId,
-                    syncedAt = DateTimeFormatter.ISO_INSTANT.format(now),
+                    syncedAt = now.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                     window = SyncWindow(
-                        from = DateTimeFormatter.ISO_INSTANT.format(from),
-                        to = DateTimeFormatter.ISO_INSTANT.format(now),
+                        from = from.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                        to = now.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                     ),
                     steps = steps,
                     heartRate = hr,

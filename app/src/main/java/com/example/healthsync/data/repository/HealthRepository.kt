@@ -64,8 +64,9 @@ class HealthRepository @Inject constructor(
         )
         return resp.records.flatMap { rec ->
             rec.samples.map {
+                val zone = ZoneId.systemDefault()
                 HeartRateSample(
-                    timestamp = DateTimeFormatter.ISO_INSTANT.format(it.time),
+                    timestamp = it.time.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                     bpm = it.beatsPerMinute,
                 )
             }
@@ -118,8 +119,9 @@ class HealthRepository @Inject constructor(
             )
         )
         return resp.records.map {
+            val zone = ZoneId.systemDefault()
             BloodPressureSample(
-                timestamp = DateTimeFormatter.ISO_INSTANT.format(it.time),
+                timestamp = it.time.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 systolic = it.systolic.inMillimetersOfMercury,
                 diastolic = it.diastolic.inMillimetersOfMercury,
             )
@@ -135,8 +137,9 @@ class HealthRepository @Inject constructor(
             )
         )
         return resp.records.map {
+            val zone = ZoneId.systemDefault()
             BloodOxygenSample(
-                timestamp = DateTimeFormatter.ISO_INSTANT.format(it.time),
+                timestamp = it.time.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 percentage = it.percentage.value,
             )
         }
@@ -159,6 +162,7 @@ class HealthRepository @Inject constructor(
             var awake = 0L
             
             val stageList = session.stages.map { stage ->
+                val zone = ZoneId.systemDefault()
                 val duration = Duration.between(stage.startTime, stage.endTime).toMinutes()
                 when (stage.stage) {
                     SleepSessionRecord.STAGE_TYPE_LIGHT -> light += duration
@@ -167,16 +171,17 @@ class HealthRepository @Inject constructor(
                     SleepSessionRecord.STAGE_TYPE_AWAKE -> awake += duration
                 }
                 SleepStage(
-                    startTime = DateTimeFormatter.ISO_INSTANT.format(stage.startTime),
-                    endTime = DateTimeFormatter.ISO_INSTANT.format(stage.endTime),
+                    startTime = stage.startTime.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                    endTime = stage.endTime.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                     stage = stage.stage,
                     durationMinutes = duration
                 )
             }
 
+            val zone = ZoneId.systemDefault()
             SleepSession(
-                startTime = DateTimeFormatter.ISO_INSTANT.format(session.startTime),
-                endTime = DateTimeFormatter.ISO_INSTANT.format(session.endTime),
+                startTime = session.startTime.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                endTime = session.endTime.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 totalDurationMinutes = totalDuration,
                 lightSleepMinutes = light,
                 deepSleepMinutes = deep,
