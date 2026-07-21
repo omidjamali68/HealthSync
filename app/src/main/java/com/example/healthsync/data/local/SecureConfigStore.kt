@@ -63,6 +63,10 @@ class SecureConfigStore @Inject constructor(
         get() = prefs.getBoolean(KEY_ONBOARDED, false)
         set(value) = prefs.edit().putBoolean(KEY_ONBOARDED, value).apply()
 
+    var lastSyncTimestamp: Long
+        get() = prefs.getLong(KEY_LAST_SYNC, 0L)
+        set(value) = prefs.edit().putLong(KEY_LAST_SYNC, value).apply()
+
     fun isConfigured(): Boolean =
         baseUrl.isNotBlank() && authToken.isNotBlank() && deviceId.isNotBlank()
 
@@ -73,5 +77,6 @@ class SecureConfigStore @Inject constructor(
         const val KEY_INTERVAL = "sync_interval"
         const val KEY_DEVICE_ID = "device_id"
         const val KEY_ONBOARDED = "onboarded"
+        const val KEY_LAST_SYNC = "last_sync_timestamp"
     }
 }

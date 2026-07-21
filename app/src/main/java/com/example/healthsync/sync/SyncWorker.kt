@@ -49,7 +49,14 @@ class SyncWorker @AssistedInject constructor(
         val isRetry = runAttemptCount > 0
         if (!isRetry) {
             val now = Instant.now()
-            val from = now.minus(config.syncIntervalMinutes.coerceAtLeast(15), ChronoUnit.MINUTES)
+            val lastSync = config.lastSyncTimestamp
+            val from = if (lastSync > 0) {
+                Instant.ofEpochMilli(lastSync)
+            } else {
+                // اولین اجرا: مثلاً از ۲۴ ساعت پیش شروع کن
+                now.minus(24, ChronoUnit.HOURS)
+            }
+
             Log.d("SyncWorker", "Reading data from $from to $now")
 
             val hr = health.readHeartRate(from, now)
@@ -80,6 +87,8 @@ class SyncWorker @AssistedInject constructor(
             } else {
                 Log.d("SyncWorker", "No new data to enqueue")
             }
+            // آپدیت زمان آخرین همگام‌سازی برای جلوگیری از ایجاد شکاف در اجرای بعدی
+            config.lastSyncTimestamp = now.toEpochMilli()
         } else {
             Log.d("SyncWorker", "Retry attempt $runAttemptCount: skipping data collection to avoid duplicates")
         }
