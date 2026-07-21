@@ -65,12 +65,30 @@ class SyncRepository @Inject constructor(
             if (result.isSuccess) {
                 Log.d("SyncRepository", "Batch ${batch.id} sent successfully")
                 queueDao.delete(batch.id)
+                
+                val hrCount = payload.heartRate.size
+                val stepsCount = payload.steps.size
+                val bpCount = payload.bloodPressure.size
+                val oxCount = payload.bloodOxygen.size
+                val sleepCount = payload.sleep.size
+                val totalItems = hrCount + stepsCount + bpCount + oxCount + sleepCount
+                
+                val detailMsg = buildString {
+                    append("Sent: ")
+                    if (hrCount > 0) append("HR($hrCount) ")
+                    if (stepsCount > 0) append("Steps($stepsCount) ")
+                    if (bpCount > 0) append("BP($bpCount) ")
+                    if (oxCount > 0) append("Ox($oxCount) ")
+                    if (sleepCount > 0) append("Sleep($sleepCount) ")
+                    if (totalItems == 0) append("No new records")
+                }.trim()
+
                 logDao.insert(
                     SyncLogEntity(
                         timestamp = System.currentTimeMillis(),
                         success = true,
-                        message = "Sent ${payload.heartRate.size} HR / ${payload.steps.size} step rows",
-                        itemsSent = payload.heartRate.size + payload.steps.size,
+                        message = detailMsg,
+                        itemsSent = totalItems,
                     )
                 )
             } else {
