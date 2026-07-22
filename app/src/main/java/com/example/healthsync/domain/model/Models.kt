@@ -9,6 +9,12 @@ data class HeartRateSample(
 )
 
 @Serializable
+data class RestingHeartRateSample(
+    val timestamp: String,
+    val bpm: Long,
+)
+
+@Serializable
 data class StepRecord(
     val date: String, // yyyy-MM-dd
     val count: Long,
@@ -59,6 +65,7 @@ data class SyncPayload(
     val window: SyncWindow,
     val steps: List<StepRecord>,
     val heartRate: List<HeartRateSample>,
+    val restingHeartRate: List<RestingHeartRateSample>,
     val bloodPressure: List<BloodPressureSample>,
     val bloodOxygen: List<BloodOxygenSample>,
     val sleep: List<SleepSession>,

@@ -11,7 +11,7 @@
     <string name="health_connect">هلث کانکت (Health Connect)</string>
     <string name="health_connect_not_supported">هلث کانکت در این دستگاه پشتیبانی نمی‌شود.</string>
     <string name="health_connect_update_required">لطفاً اپلیکیشن Health Connect را از پلی استور نصب یا به‌روزرسانی کنید، سپس به اینجا بازگردید.</string>
-    <string name="permissions_explanation">هلث‌سینک برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
+    <string name="permissions_explanation">هلث‌سینک برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب و ضربان قلب استراحت\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
     <string name="all_permissions_granted">تمامی دسترسی‌های لازم داده شده است.</string>
     <string name="grant_permissions">اعطای دسترسی‌های هلث کانکت</string>
     <string name="continue_button">ادامه</string>

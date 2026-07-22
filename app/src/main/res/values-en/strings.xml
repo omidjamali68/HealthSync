@@ -11,7 +11,7 @@
     <string name="health_connect">Health Connect</string>
     <string name="health_connect_not_supported">Health Connect is not supported on this device.</string>
     <string name="health_connect_update_required">Please install or update the Health Connect app from Play Store, then return here.</string>
-    <string name="permissions_explanation">HealthSync needs permission to read:\n• Heart rate samples\n• Daily steps\n• Blood pressure\n• Blood oxygen\n• Sleep sessions</string>
+    <string name="permissions_explanation">HealthSync needs permission to read:\n• Heart rate and resting heart rate\n• Daily steps\n• Blood pressure\n• Blood oxygen\n• Sleep sessions</string>
     <string name="all_permissions_granted">All required permissions are granted.</string>
     <string name="grant_permissions">Grant Health Connect permissions</string>
     <string name="continue_button">Continue</string>

@@ -7,6 +7,7 @@ import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
@@ -34,6 +35,7 @@ class HealthRepository @Inject constructor(
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
         HealthPermission.getReadPermission(BloodPressureRecord::class),
         HealthPermission.getReadPermission(OxygenSaturationRecord::class),
+        HealthPermission.getReadPermission(RestingHeartRateRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class),
     )
 
@@ -70,6 +72,23 @@ class HealthRepository @Inject constructor(
                     bpm = it.beatsPerMinute,
                 )
             }
+        }
+    }
+
+    suspend fun readRestingHeartRate(from: Instant, to: Instant): List<RestingHeartRateSample> {
+        val c = client() ?: return emptyList()
+        val resp = c.readRecords(
+            ReadRecordsRequest(
+                recordType = RestingHeartRateRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(from, to),
+            )
+        )
+        return resp.records.map {
+            val zone = ZoneId.systemDefault()
+            RestingHeartRateSample(
+                timestamp = it.time.atZone(zone).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                bpm = it.beatsPerMinute,
+            )
         }
     }
 

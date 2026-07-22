@@ -60,14 +60,15 @@ class SyncWorker @AssistedInject constructor(
             Log.d("SyncWorker", "Reading data from $from to $now")
 
             val hr = health.readHeartRate(from, now)
+            val restingHr = health.readRestingHeartRate(from, now)
             val steps = health.readDailySteps(from, now)
             val bp = health.readBloodPressure(from, now)
             val bo = health.readBloodOxygen(from, now)
             val sleep = health.readSleepSessions(from, now)
 
-            Log.d("SyncWorker", "Data found: HR=${hr.size}, Steps=${steps.size}, BP=${bp.size}, BO=${bo.size}, Sleep=${sleep.size}")
+            Log.d("SyncWorker", "Data found: HR=${hr.size}, RHR=${restingHr.size}, Steps=${steps.size}, BP=${bp.size}, BO=${bo.size}, Sleep=${sleep.size}")
 
-            if (hr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
+            if (hr.isNotEmpty() || restingHr.isNotEmpty() || steps.isNotEmpty() || bp.isNotEmpty() || bo.isNotEmpty() || sleep.isNotEmpty()) {
                 val zone = ZoneId.systemDefault()
                 val payload = SyncPayload(
                     deviceId = config.deviceId,
@@ -78,6 +79,7 @@ class SyncWorker @AssistedInject constructor(
                     ),
                     steps = steps,
                     heartRate = hr,
+                    restingHeartRate = restingHr,
                     bloodPressure = bp,
                     bloodOxygen = bo,
                     sleep = sleep,
