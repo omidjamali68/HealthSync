@@ -30,10 +30,17 @@ class SyncWorker @AssistedInject constructor(
     private val health: HealthRepository,
     private val sync: SyncRepository,
     private val config: SecureConfigStore,
+    private val scheduler: SyncScheduler,
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = runCatching {
         Log.d("SyncWorker", "Starting sync work...")
+        
+        // اگر این یک اجرای DAILY_SYNC است، دفعه بعدی را برای فردا رزرو کن
+        if (tags.contains("DAILY_SYNC")) {
+            scheduler.scheduleDailySync()
+        }
+
         if (!config.isConfigured()) {
             Log.w("SyncWorker", "Sync skipped: App not configured. " +
                     "BaseURL: ${config.baseUrl.isNotBlank()}, " +
@@ -42,8 +49,12 @@ class SyncWorker @AssistedInject constructor(
             return Result.success()
         }
         if (!health.hasAllPermissions()) {
-            Log.w("SyncWorker", "Sync skipped: Missing Health Connect permissions")
+            Log.w("SyncWorker", "Sync skipped: Missing basic Health Connect permissions")
             return Result.retry()
+        }
+        
+        if (!health.hasBackgroundPermission()) {
+            Log.w("SyncWorker", "Sync warning: Missing Background Read permission. Sync might fail when app is closed.")
         }
 
         val isRetry = runAttemptCount > 0
@@ -107,5 +118,6 @@ class SyncWorker @AssistedInject constructor(
     companion object {
         const val UNIQUE_NAME = "healthsync_periodic"
         const val ONE_SHOT = "healthsync_oneshot"
+        const val DAILY_SYNC_NAME = "healthsync_daily"
     }
 }

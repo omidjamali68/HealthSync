@@ -74,6 +74,35 @@ fun PermissionsScreen(
                     )
                     if (state.granted) {
                         Text(stringResource(R.string.all_permissions_granted), color = MaterialTheme.colorScheme.primary)
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            "برای فعال‌سازی ارسال در پس‌زمینه (Background Sync):",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            "۱. وارد تنظیمات Health Connect شوید.\n۲. اپلیکیشن HealthSync را انتخاب کنید.\n۳. در پایین صفحه گزینه Additional Access را فعال کنید.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        
+                        val context = LocalContext.current
+                        Button(
+                            onClick = {
+                                val intent = android.content.Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS").apply {
+                                    putExtra(android.content.Intent.EXTRA_PACKAGE_NAME, context.packageName)
+                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    context.startActivity(android.content.Intent(androidx.health.connect.client.HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Text("باز کردن تنظیمات Health Connect")
+                        }
                     } else {
                         Button(
                             onClick = { launcher.launch(vm.required) },

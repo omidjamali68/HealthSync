@@ -56,6 +56,12 @@ class HealthRepository @Inject constructor(
         return granted.containsAll(permissions)
     }
 
+    suspend fun hasBackgroundPermission(): Boolean {
+        val c = client() ?: return false
+        val granted = c.permissionController.getGrantedPermissions()
+        return granted.contains("androidx.health.connect.permission.HEALTH_CONNECT_BACKGROUND_READ")
+    }
+
     suspend fun readHeartRate(from: Instant, to: Instant): List<HeartRateSample> {
         val c = client() ?: return emptyList()
         val resp = c.readRecords(
