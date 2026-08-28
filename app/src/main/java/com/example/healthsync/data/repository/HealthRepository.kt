@@ -56,6 +56,12 @@ class HealthRepository @Inject constructor(
         return granted.containsAll(permissions)
     }
 
+    suspend fun hasBackgroundPermission(): Boolean {
+        val c = client() ?: return false
+        val granted = c.permissionController.getGrantedPermissions()
+        return granted.contains("androidx.health.connect.permission.HEALTH_CONNECT_BACKGROUND_READ")
+    }
+
     suspend fun readHeartRate(from: Instant, to: Instant): List<HeartRateSample> {
         val c = client() ?: return emptyList()
         val resp = c.readRecords(
@@ -106,15 +112,29 @@ class HealthRepository @Inject constructor(
                 AggregateRequest(
                     metrics = setOf(
                         StepsRecord.COUNT_TOTAL,
-                        DistanceRecord.DISTANCE_TOTAL,
-                        TotalCaloriesBurnedRecord.ENERGY_TOTAL
+                        DistanceRecord.DISTANCE_TOTAL
                     ),
                     timeRangeFilter = TimeRangeFilter.between(dayStart, dayEnd),
                 )
             )
             val steps = agg[StepsRecord.COUNT_TOTAL] ?: 0L
             val distance = agg[DistanceRecord.DISTANCE_TOTAL]?.inKilometers ?: 0.0
-            val calories = agg[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inKilocalories ?: 0.0
+
+            // Sum calories manually from individual records instead of using aggregate
+            // to match the list view sum which the user requested.
+            var calories = 0.0
+            var pageToken: String? = null
+            do {
+                val calorieResp = c.readRecords(
+                    ReadRecordsRequest(
+                        recordType = TotalCaloriesBurnedRecord::class,
+                        timeRangeFilter = TimeRangeFilter.between(dayStart, dayEnd),
+                        pageToken = pageToken
+                    )
+                )
+                calories += calorieResp.records.sumOf { it.energy.inKilocalories }
+                pageToken = calorieResp.pageToken
+            } while (pageToken != null)
 
             if (steps > 0L || distance > 0.0 || calories > 0.0) {
                 out += StepRecord(
