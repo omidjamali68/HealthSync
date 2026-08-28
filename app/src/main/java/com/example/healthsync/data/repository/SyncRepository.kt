@@ -8,6 +8,7 @@ import com.example.healthsync.data.local.SyncLogEntity
 import com.example.healthsync.data.local.SyncQueueDao
 import com.example.healthsync.data.remote.HealthApi
 import com.example.healthsync.domain.model.SyncPayload
+import com.example.healthsync.util.SessionManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -21,6 +22,7 @@ class SyncRepository @Inject constructor(
     private val queueDao: SyncQueueDao,
     private val logDao: SyncLogDao,
     private val config: SecureConfigStore,
+    private val sessionManager: SessionManager,
     private val json: Json,
 ) {
     private val drainMutex = Mutex()
@@ -95,6 +97,22 @@ class SyncRepository @Inject constructor(
                 val errorMsg = result.exceptionOrNull()?.message ?: "HTTP ${result.statusCode}"
                 val isPermanent = result.isPermanentFailure()
                 
+                if (result.statusCode == 401) {
+                    Log.e("SyncRepository", "Authentication failed (401). Clearing session.")
+                    sessionManager.clear()
+                    // Stop trying other batches if we're not authenticated
+                    logDao.insert(
+                        SyncLogEntity(
+                            timestamp = System.currentTimeMillis(),
+                            success = false,
+                            message = "Auth failed (401). Token expired?",
+                            itemsSent = 0,
+                        )
+                    )
+                    allOk = false
+                    break
+                }
+                
                 if (isPermanent) {
                     Log.e("SyncRepository", "Permanent failure for batch ${batch.id}: $errorMsg")
                     // It's a 4xx error (not 429), no point in retrying this batch.
@@ -134,7 +152,8 @@ class SyncRepository @Inject constructor(
     ) {
         fun isPermanentFailure(): Boolean {
             if (exception != null) return false // Network errors are not permanent
-            return statusCode in 400..499 && statusCode != 429
+            // 401 is handled separately to trigger logout
+            return statusCode in 400..499 && statusCode != 429 && statusCode != 401
         }
         fun exceptionOrNull() = exception
     }

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
@@ -38,6 +41,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val isLoggedIn by sessionManager.isLoggedInFlow.collectAsState()
+            
             // Determine the layout direction based on the current app locale
             val currentLocale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             val isRtl = currentLocale.language == "fa"
@@ -50,7 +55,16 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        val startDestination = if (sessionManager.isLoggedIn()) {
+                        
+                        LaunchedEffect(isLoggedIn) {
+                            if (!isLoggedIn) {
+                                navController.navigate(Routes.AUTH) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        }
+
+                        val startDestination = if (isLoggedIn) {
                             Routes.DASHBOARD
                         } else {
                             Routes.AUTH

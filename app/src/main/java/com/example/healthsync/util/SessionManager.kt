@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,8 +26,12 @@ class SessionManager @Inject constructor(
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
+    private val _isLoggedIn = MutableStateFlow(!getToken().isNullOrBlank())
+    val isLoggedInFlow: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
     fun saveToken(token: String) {
         prefs.edit().putString("auth_token", token).apply()
+        _isLoggedIn.value = true
     }
 
     fun getToken(): String? {
@@ -37,5 +44,6 @@ class SessionManager @Inject constructor(
 
     fun clear() {
         prefs.edit().clear().apply()
+        _isLoggedIn.value = false
     }
 }
