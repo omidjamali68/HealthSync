@@ -24,6 +24,7 @@ data class DashboardUiState(
     val queueSize: Int = 0,
     val lastSuccessAt: Long? = null,
     val logs: List<SyncLogEntity> = emptyList(),
+    val selectedLog: SyncLogEntity? = null,
 )
 
 @HiltViewModel
@@ -54,6 +55,10 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun syncNow() = scheduler.runNow()
+
+    fun selectLog(log: SyncLogEntity?) {
+        _state.value = _state.value.copy(selectedLog = log)
+    }
 
     fun clearQueue() {
         viewModelScope.launch {

@@ -91,6 +91,7 @@ class SyncRepository @Inject constructor(
                         success = true,
                         message = detailMsg,
                         itemsSent = totalItems,
+                        payloadJson = batch.payloadJson,
                     )
                 )
             } else {

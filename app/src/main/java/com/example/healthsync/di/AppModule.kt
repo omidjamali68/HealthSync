@@ -61,7 +61,9 @@ object AppModule {
 
     @Provides @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "healthsync.db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, "healthsync.db")
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides fun provideQueueDao(db: AppDatabase): SyncQueueDao = db.syncQueueDao()
     @Provides fun provideLogDao(db: AppDatabase): SyncLogDao = db.syncLogDao()

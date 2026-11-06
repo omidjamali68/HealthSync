@@ -25,6 +25,7 @@ data class SyncLogEntity(
     val success: Boolean,
     val message: String,
     val itemsSent: Int,
+    val payloadJson: String? = null,
 )
 
 @Dao
@@ -62,7 +63,7 @@ interface SyncLogDao {
 
 @Database(
     entities = [QueuedBatchEntity::class, SyncLogEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {

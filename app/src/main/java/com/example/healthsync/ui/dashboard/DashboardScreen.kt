@@ -16,6 +16,10 @@ import java.util.Date
 
 import androidx.compose.ui.res.stringResource
 import com.example.healthsync.R
+import com.example.healthsync.data.local.SyncLogEntity
+import com.example.healthsync.domain.model.SyncPayload
+import kotlinx.serialization.json.Json
+import androidx.compose.foundation.clickable
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -31,6 +35,15 @@ fun DashboardScreen(
 ) {
     val s by vm.state.collectAsState()
     val df = remember { DateFormat.getDateTimeInstance() }
+    val sheetState = rememberModalBottomSheetState()
+
+    if (s.selectedLog != null) {
+        SyncLogDetailSheet(
+            log = s.selectedLog!!,
+            onDismiss = { vm.selectLog(null) },
+            sheetState = sheetState
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -131,6 +144,7 @@ fun DashboardScreen(
                 ) {
                     items(s.logs, key = { it.id }) { log ->
                         ListItem(
+                            modifier = Modifier.clickable { vm.selectLog(log) },
                             headlineContent = {
                                 Surface(
                                     color = if (log.success) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
@@ -164,5 +178,87 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SyncLogDetailSheet(
+    log: SyncLogEntity,
+    onDismiss: () -> Unit,
+    sheetState: SheetState,
+) {
+    val payload = remember(log.payloadJson) {
+        log.payloadJson?.let {
+            runCatching { Json.decodeFromString(SyncPayload.serializer(), it) }.getOrNull()
+        }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "جزئیات ارسال داده",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = log.message,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            HorizontalDivider()
+
+            if (payload != null) {
+                DetailRow("تعداد قدم‌ها", payload.steps.size.toString())
+                DetailRow("ضربان قلب", payload.heartRate.size.toString())
+                DetailRow("ضربان استراحت", payload.restingHeartRate.size.toString())
+                DetailRow("فشار خون", payload.bloodPressure.size.toString())
+                DetailRow("اکسیژن خون", payload.bloodOxygen.size.toString())
+                DetailRow("خواب", payload.sleep.size.toString())
+                
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "بازه زمانی داده‌ها:",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "${payload.window.from} تا ${payload.window.to}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
+                Text(
+                    text = "جزئیات داده‌های ارسال شده برای این لاگ در دسترس نیست.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+        )
     }
 }
