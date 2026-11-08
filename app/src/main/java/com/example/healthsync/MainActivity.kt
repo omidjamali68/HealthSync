@@ -1,8 +1,9 @@
 package com.example.healthsync
 
+import android.content.Context
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -25,26 +26,31 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Force Persian on first run if no preference is saved
-        val prefs = getSharedPreferences("app_settings", MODE_PRIVATE)
+        val prefs = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         if (!prefs.contains("locale_set")) {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("fa"))
             prefs.edit().putBoolean("locale_set", true).apply()
         }
-        
+
         super.onCreate(savedInstanceState)
 
         setContent {
             val isLoggedIn by sessionManager.isLoggedInFlow.collectAsState()
-            
-            // Determine the layout direction based on the current app locale
-            val currentLocale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+
+            val appLocales = AppCompatDelegate.getApplicationLocales()
+            val currentLocale = if (!appLocales.isEmpty) {
+                appLocales[0] ?: Locale.getDefault()
+            } else {
+                Locale.getDefault()
+            }
+
             val isRtl = currentLocale.language == "fa"
             val layoutDirection = if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
 
@@ -52,10 +58,10 @@ class MainActivity : ComponentActivity() {
                 HealthSyncTheme {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
+                        color = MaterialTheme.colorScheme.background,
                     ) {
                         val navController = rememberNavController()
-                        
+
                         LaunchedEffect(isLoggedIn) {
                             if (!isLoggedIn) {
                                 navController.navigate(Routes.AUTH) {

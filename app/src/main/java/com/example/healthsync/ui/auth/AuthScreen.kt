@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.healthsync.R
 
 @Composable
 fun AuthScreen(
@@ -34,7 +36,7 @@ fun AuthScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Green Header like the website
+        // Green Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -43,7 +45,7 @@ fun AuthScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "طب دیتا",
+                text = stringResource(R.string.teb_data),
                 color = Color.White,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -78,7 +80,7 @@ fun AuthScreen(
 
             uiState.error?.let {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = it, color = MaterialTheme.colorScheme.error)
+                Text(text = it.asString(), color = MaterialTheme.colorScheme.error)
             }
 
             if (uiState.isLoading) {
@@ -92,7 +94,7 @@ fun AuthScreen(
 @Composable
 fun LoginStage(state: AuthUiState, viewModel: AuthViewModel) {
     Text(
-        text = "ورود به اپلیکیشن",
+        text = stringResource(R.string.login_title),
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.primary
     )
@@ -100,8 +102,8 @@ fun LoginStage(state: AuthUiState, viewModel: AuthViewModel) {
     OutlinedTextField(
         value = state.mobileNumber,
         onValueChange = viewModel::onMobileNumberChange,
-        label = { Text("شماره موبایل") },
-        placeholder = { Text("09175001122", color = Color.Gray) },
+        label = { Text(stringResource(R.string.mobile_number)) },
+        placeholder = { Text(stringResource(R.string.mobile_placeholder), color = Color.Gray) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
@@ -114,20 +116,20 @@ fun LoginStage(state: AuthUiState, viewModel: AuthViewModel) {
         enabled = !state.isLoading && state.mobileNumber.length == 11,
         shape = MaterialTheme.shapes.medium
     ) {
-        Text("دریافت کد تایید", style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.send_code), style = MaterialTheme.typography.labelLarge)
     }
 }
 
 @Composable
 fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
     Text(
-        text = "کد تایید را وارد کنید",
+        text = stringResource(R.string.enter_verification_code),
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.primary
     )
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-        text = "کد به شماره ${state.mobileNumber} ارسال شد",
+        text = stringResource(R.string.code_sent_to, state.mobileNumber),
         style = MaterialTheme.typography.bodyMedium,
         color = Color.Gray
     )
@@ -182,12 +184,12 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
         enabled = !state.isLoading && state.verificationCode.all { it.isNotEmpty() },
         shape = MaterialTheme.shapes.medium
     ) {
-        Text("تایید و ورود")
+        Text(stringResource(R.string.verify_and_login))
     }
 
     if (state.timerSeconds == 0) {
         TextButton(onClick = viewModel::sendCode) {
-            Text("ارسال مجدد کد", color = MaterialTheme.colorScheme.secondary)
+            Text(stringResource(R.string.resend_code), color = MaterialTheme.colorScheme.secondary)
         }
     }
 }

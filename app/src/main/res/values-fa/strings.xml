@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">هلث‌سینک</string>
+    <string name="teb_data">طب دیتا</string>
+
+    <!-- Onboarding -->
+    <string name="welcome_title">به هلث‌سینک خوش آمدید</string>
+    <string name="welcome_desc">هلث‌سینک داده‌های ضربان قلب و گام‌های شما را از Android Health Connect خوانده و به‌صورت امن در سرور پیکربندی شده شما بارگذاری می‌کند.</string>
+    <string name="onboarding_points">• داده‌ها فقط به مقصد تعیین شده توسط شما ارسال می‌شوند.\n• توکن API شما در فضای ذخیره‌سازی رمزگذاری شده نگهداری می‌شود.\n• همگام‌سازی در پس‌زمینه و در بازه‌های زمانی انتخابی شما انجام می‌شود.</string>
+    <string name="get_started">شروع کنید</string>
+
+    <!-- Auth -->
+    <string name="login_title">ورود به اپلیکیشن</string>
+    <string name="mobile_number">شماره موبایل</string>
+    <string name="mobile_placeholder">09175001122</string>
+    <string name="send_code">دریافت کد تایید</string>
+    <string name="enter_verification_code">کد تایید را وارد کنید</string>
+    <string name="code_sent_to">کد به شماره %1$s ارسال شد</string>
+    <string name="verify_and_login">تایید و ورود</string>
+    <string name="resend_code">ارسال مجدد کد</string>
+    <string name="invalid_mobile">شماره موبایل معتبر نیست</string>
+    <string name="invalid_code_length">کد تایید باید 6 رقم باشد</string>
+    <string name="error_getting_token">خطا در دریافت توکن</string>
+
+    <!-- Permissions -->
+    <string name="health_connect">هلث کانکت (Health Connect)</string>
+    <string name="health_connect_not_supported">هلث کانکت در این دستگاه پشتیبانی نمی‌شود.</string>
+    <string name="health_connect_update_required">لطفاً اپلیکیشن Health Connect را از پلی استور نصب یا به‌روزرسانی کنید، سپس به اینجا بازگردید.</string>
+    <string name="permissions_explanation">هلث‌سینک برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب و ضربان قلب استراحت\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
+    <string name="all_permissions_granted">تمامی دسترسی‌های لازم داده شده است.</string>
+    <string name="grant_permissions">اعطای دسترسی‌های هلث کانکت</string>
+    <string name="continue_button">ادامه</string>
+    <string name="background_sync_title">برای فعال‌سازی ارسال در پس‌زمینه (Background Sync):</string>
+    <string name="background_sync_instructions">۱. وارد تنظیمات Health Connect شوید.\n۲. اپلیکیشن HealthSync را انتخاب کنید.\n۳. در پایین صفحه گزینه Additional Access را فعال کنید.</string>
+    <string name="open_health_connect_settings">باز کردن تنظیمات Health Connect</string>
+
+    <!-- Dashboard -->
+    <string name="sync_dashboard">داشبورد همگام‌سازی</string>
+    <string name="permissions_tab">دسترسی‌ها</string>
+    <string name="settings_tab">تنظیمات</string>
+    <string name="status_label">وضعیت</string>
+    <string name="device_id_label">شناسه دستگاه: %1$s</string>
+    <string name="last_sync_label">آخرین همگام‌سازی موفق: %1$s</string>
+    <string name="never">هرگز</string>
+    <string name="pending_batches_label">دسته‌های در انتظار در صف: %1$d</string>
+    <string name="sync_interval_label">بازه همگام‌سازی: %1$d دقیقه</string>
+    <string name="sync_now">همگام‌سازی اکنون</string>
+    <string name="send_test_data">ارسال دیتای تست (همه پارامترها)</string>
+    <string name="clear_queue">پاکسازی صف انتظار</string>
+    <string name="recent_activity">فعالیت‌های اخیر</string>
+    <string name="success">موفقیت‌آمیز</string>
+    <string name="failed">ناموفق</string>
+    <string name="sync_log_detail_title">جزئیات ارسال داده</string>
+    <string name="detail_steps">تعداد قدم‌ها</string>
+    <string name="detail_heart_rate">ضربان قلب</string>
+    <string name="detail_resting_heart_rate">ضربان استراحت</string>
+    <string name="detail_blood_pressure">فشار خون</string>
+    <string name="detail_blood_oxygen">اکسیژن خون</string>
+    <string name="detail_sleep">خواب</string>
+    <string name="data_time_window">بازه زمانی داده‌ها:</string>
+    <string name="time_range_format">%1$s تا %2$s</string>
+    <string name="log_details_not_available">جزئیات داده‌های ارسال شده برای این لاگ در دسترس نیست.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">تنظیمات</string>
+    <string name="sync_settings_title">تنظیمات همگام‌سازی</string>
+    <string name="api_configuration">پیکربندی API</string>
+    <string name="base_url">آدرس پایه (Base URL)</string>
+    <string name="ingest_path">مسیر دریافت (Ingest path)</string>
+    <string name="auth_token">توکن امنیتی (Auth token)</string>
+    <string name="device_id">شناسه دستگاه</string>
+    <string name="sync_interval">بازه همگام‌سازی (دقیقه، حداقل ۱۵)</string>
+    <string name="save">ذخیره</string>
+    <string name="save_continue">ذخیره و ادامه</string>
+    <string name="language_selection">زبان</string>
+    <string name="persian">فارسی</string>
+    <string name="english">English</string>
+    <string name="saved_msg">ذخیره شد. همگام‌سازی دوره‌ای برنامه‌ریزی شد.</string>
+    <string name="logout">خروج از حساب کاربری</string>
+    <string name="logout_confirm">آیا مطمئن هستید که می‌خواهید خارج شوید؟</string>
+    <string name="account_management">مدیریت حساب</string>
+</resources>

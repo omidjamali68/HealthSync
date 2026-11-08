@@ -1,11 +1,25 @@
 <resources>
     <string name="app_name">HealthSync</string>
+    <string name="teb_data">TebData</string>
 
     <!-- Onboarding -->
     <string name="welcome_title">Welcome to HealthSync</string>
     <string name="welcome_desc">HealthSync reads your heart rate and step data from Android Health Connect and securely uploads it to your configured server.</string>
     <string name="onboarding_points">• Data leaves your device only to the endpoint you configure.\n• Your API token is stored in encrypted storage.\n• Sync runs in the background on your chosen interval.</string>
     <string name="get_started">Get started</string>
+
+    <!-- Auth -->
+    <string name="login_title">App Login</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="mobile_placeholder">09175001122</string>
+    <string name="send_code">Get Verification Code</string>
+    <string name="enter_verification_code">Enter Verification Code</string>
+    <string name="code_sent_to">Code sent to %1$s</string>
+    <string name="verify_and_login">Verify &amp; Login</string>
+    <string name="resend_code">Resend Code</string>
+    <string name="invalid_mobile">Mobile number is invalid</string>
+    <string name="invalid_code_length">Verification code must be 6 digits</string>
+    <string name="error_getting_token">Error receiving authentication token</string>
 
     <!-- Permissions -->
     <string name="health_connect">Health Connect</string>
@@ -15,6 +29,9 @@
     <string name="all_permissions_granted">All required permissions are granted.</string>
     <string name="grant_permissions">Grant Health Connect permissions</string>
     <string name="continue_button">Continue</string>
+    <string name="background_sync_title">To enable Background Sync:</string>
+    <string name="background_sync_instructions">1. Open Health Connect settings.\n2. Select HealthSync app.\n3. Enable Additional Access at the bottom of the page.</string>
+    <string name="open_health_connect_settings">Open Health Connect Settings</string>
 
     <!-- Dashboard -->
     <string name="sync_dashboard">Sync dashboard</string>
@@ -27,11 +44,25 @@
     <string name="pending_batches_label">Pending batches in queue: %1$d</string>
     <string name="sync_interval_label">Sync interval: %1$d min</string>
     <string name="sync_now">Sync now</string>
+    <string name="send_test_data">Send test data (all parameters)</string>
+    <string name="clear_queue">Clear pending queue</string>
     <string name="recent_activity">Recent activity</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>
+    <string name="sync_log_detail_title">Data Payload Details</string>
+    <string name="detail_steps">Steps count</string>
+    <string name="detail_heart_rate">Heart rate</string>
+    <string name="detail_resting_heart_rate">Resting heart rate</string>
+    <string name="detail_blood_pressure">Blood pressure</string>
+    <string name="detail_blood_oxygen">Blood oxygen</string>
+    <string name="detail_sleep">Sleep</string>
+    <string name="data_time_window">Data time window:</string>
+    <string name="time_range_format">%1$s to %2$s</string>
+    <string name="log_details_not_available">Sent data details are not available for this log.</string>
 
     <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="sync_settings_title">Sync Settings</string>
     <string name="api_configuration">API configuration</string>
     <string name="base_url">Base URL</string>
     <string name="ingest_path">Ingest path</string>
@@ -41,7 +72,7 @@
     <string name="save">Save</string>
     <string name="save_continue">Save &amp; continue</string>
     <string name="language_selection">Language</string>
-    <string name="persian">Persian</string>
+    <string name="persian">فارسی</string>
     <string name="english">English</string>
     <string name="saved_msg">Saved. Periodic sync scheduled.</string>
     <string name="logout">Logout</string>

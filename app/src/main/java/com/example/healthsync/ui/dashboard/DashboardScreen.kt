@@ -1,29 +1,26 @@
 package com.example.healthsync.ui.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import java.text.DateFormat
-import java.util.Date
-
-import androidx.compose.ui.res.stringResource
 import com.example.healthsync.R
 import com.example.healthsync.data.local.SyncLogEntity
 import com.example.healthsync.domain.model.SyncPayload
 import kotlinx.serialization.json.Json
-import androidx.compose.foundation.clickable
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.ExitToApp
+import java.text.DateFormat
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -117,14 +114,14 @@ fun DashboardScreen(
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
             ) {
-                Text("ارسال دیتای تست (همه پارامترها)")
+                Text(stringResource(R.string.send_test_data))
             }
 
             TextButton(
                 onClick = vm::clearQueue,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("پاکسازی صف انتظار", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.clear_queue), color = MaterialTheme.colorScheme.error)
             }
 
             Text(
@@ -207,7 +204,7 @@ fun SyncLogDetailSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "جزئیات ارسال داده",
+                text = stringResource(R.string.sync_log_detail_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -220,26 +217,26 @@ fun SyncLogDetailSheet(
             HorizontalDivider()
 
             if (payload != null) {
-                DetailRow("تعداد قدم‌ها", payload.steps.size.toString())
-                DetailRow("ضربان قلب", payload.heartRate.size.toString())
-                DetailRow("ضربان استراحت", payload.restingHeartRate.size.toString())
-                DetailRow("فشار خون", payload.bloodPressure.size.toString())
-                DetailRow("اکسیژن خون", payload.bloodOxygen.size.toString())
-                DetailRow("خواب", payload.sleep.size.toString())
+                DetailRow(stringResource(R.string.detail_steps), payload.steps.size.toString())
+                DetailRow(stringResource(R.string.detail_heart_rate), payload.heartRate.size.toString())
+                DetailRow(stringResource(R.string.detail_resting_heart_rate), payload.restingHeartRate.size.toString())
+                DetailRow(stringResource(R.string.detail_blood_pressure), payload.bloodPressure.size.toString())
+                DetailRow(stringResource(R.string.detail_blood_oxygen), payload.bloodOxygen.size.toString())
+                DetailRow(stringResource(R.string.detail_sleep), payload.sleep.size.toString())
                 
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "بازه زمانی داده‌ها:",
+                    text = stringResource(R.string.data_time_window),
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.Gray
                 )
                 Text(
-                    text = "${payload.window.from} تا ${payload.window.to}",
+                    text = stringResource(R.string.time_range_format, payload.window.from, payload.window.to),
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
                 Text(
-                    text = "جزئیات داده‌های ارسال شده برای این لاگ در دسترس نیست.",
+                    text = stringResource(R.string.log_details_not_available),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )

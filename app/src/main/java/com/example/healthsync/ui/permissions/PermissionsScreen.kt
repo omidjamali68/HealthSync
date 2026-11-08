@@ -78,11 +78,11 @@ fun PermissionsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Text(
-                            "برای فعال‌سازی ارسال در پس‌زمینه (Background Sync):",
+                            stringResource(R.string.background_sync_title),
                             style = MaterialTheme.typography.titleSmall
                         )
                         Text(
-                            "۱. وارد تنظیمات Health Connect شوید.\n۲. اپلیکیشن HealthSync را انتخاب کنید.\n۳. در پایین صفحه گزینه Additional Access را فعال کنید.",
+                            stringResource(R.string.background_sync_instructions),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         
@@ -101,7 +101,7 @@ fun PermissionsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                         ) {
-                            Text("باز کردن تنظیمات Health Connect")
+                            Text(stringResource(R.string.open_health_connect_settings))
                         }
                     } else {
                         Button(

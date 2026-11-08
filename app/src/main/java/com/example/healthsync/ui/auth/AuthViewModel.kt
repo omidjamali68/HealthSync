@@ -2,8 +2,10 @@ package com.example.healthsync.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.healthsync.R
 import com.example.healthsync.data.repository.AuthRepository
 import com.example.healthsync.util.SessionManager
+import com.example.healthsync.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -41,7 +43,7 @@ class AuthViewModel @Inject constructor(
     fun sendCode() {
         val mobile = _uiState.value.mobileNumber
         if (mobile.length != 11 || !mobile.startsWith("09")) {
-            _uiState.update { it.copy(error = "شماره موبایل معتبر نیست") }
+            _uiState.update { it.copy(error = UiText.StringResource(R.string.invalid_mobile)) }
             return
         }
 
@@ -53,7 +55,7 @@ class AuthViewModel @Inject constructor(
                     startTimer()
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                    _uiState.update { it.copy(isLoading = false, error = e.message?.let { msg -> UiText.DynamicString(msg) }) }
                 }
         }
     }
@@ -61,7 +63,7 @@ class AuthViewModel @Inject constructor(
     fun login() {
         val codeString = _uiState.value.verificationCode.joinToString("")
         if (codeString.length != 6) {
-            _uiState.update { it.copy(error = "کد تایید باید 6 رقم باشد") }
+            _uiState.update { it.copy(error = UiText.StringResource(R.string.invalid_code_length)) }
             return
         }
 
@@ -75,11 +77,11 @@ class AuthViewModel @Inject constructor(
                         sessionManager.saveToken(token)
                         _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                     } ?: run {
-                        _uiState.update { it.copy(isLoading = false, error = "خطا در دریافت توکن") }
+                        _uiState.update { it.copy(isLoading = false, error = UiText.StringResource(R.string.error_getting_token)) }
                     }
                 }
                 .onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message) }
+                    _uiState.update { it.copy(isLoading = false, error = e.message?.let { msg -> UiText.DynamicString(msg) }) }
                 }
         }
     }
@@ -108,5 +110,5 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val isCodeSent: Boolean = false,
     val isLoggedIn: Boolean = false,
-    val error: String? = null
+    val error: UiText? = null
 )
