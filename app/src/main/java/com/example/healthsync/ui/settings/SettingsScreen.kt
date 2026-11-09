@@ -24,6 +24,31 @@ fun SettingsScreen(
     vm: SettingsViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(stringResource(R.string.logout)) },
+            text = { Text(stringResource(R.string.logout_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        vm.logout()
+                        onLogout()
+                    }
+                ) {
+                    Text(stringResource(R.string.logout), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -97,10 +122,7 @@ fun SettingsScreen(
             )
 
             Button(
-                onClick = { 
-                    vm.logout()
-                    onLogout()
-                },
+                onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 shape = MaterialTheme.shapes.medium

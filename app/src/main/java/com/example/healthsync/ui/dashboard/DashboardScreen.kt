@@ -33,6 +33,31 @@ fun DashboardScreen(
     val s by vm.state.collectAsState()
     val df = remember { DateFormat.getDateTimeInstance() }
     val sheetState = rememberModalBottomSheetState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text(stringResource(R.string.logout)) },
+            text = { Text(stringResource(R.string.logout_confirm)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        vm.logout()
+                        onLogout()
+                    }
+                ) {
+                    Text(stringResource(R.string.logout), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     if (s.selectedLog != null) {
         SyncLogDetailSheet(
@@ -47,10 +72,7 @@ fun DashboardScreen(
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.sync_dashboard), color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        vm.logout()
-                        onLogout()
-                    }) {
+                    IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                             contentDescription = stringResource(R.string.logout),
