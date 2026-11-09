@@ -43,7 +43,7 @@
     <string name="never">هرگز</string>
     <string name="pending_batches_label">دسته‌های در انتظار در صف: %1$d</string>
     <string name="sync_interval_label">بازه همگام‌سازی: %1$d دقیقه</string>
-    <string name="sync_now">همگام‌سازی اکنون</string>
+    <string name="sync_now">همگام‌سازی</string>
     <string name="send_test_data">ارسال دیتای تست (همه پارامترها)</string>
     <string name="clear_queue">پاکسازی صف انتظار</string>
     <string name="recent_activity">فعالیت‌های اخیر</string>

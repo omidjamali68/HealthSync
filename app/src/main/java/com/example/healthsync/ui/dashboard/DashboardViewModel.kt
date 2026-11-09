@@ -25,6 +25,7 @@ data class DashboardUiState(
     val lastSuccessAt: Long? = null,
     val logs: List<SyncLogEntity> = emptyList(),
     val selectedLog: SyncLogEntity? = null,
+    val isAdmin: Boolean = false,
 )
 
 @HiltViewModel
@@ -36,19 +37,29 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        DashboardUiState(deviceId = config.deviceId, intervalMinutes = config.syncIntervalMinutes)
+        DashboardUiState(
+            deviceId = config.deviceId,
+            intervalMinutes = config.syncIntervalMinutes,
+            isAdmin = sessionManager.isAdmin(),
+        )
     )
     val state = _state.asStateFlow()
 
     init {
         viewModelScope.launch {
-            combine(sync.queueSize, sync.lastSuccess, sync.recentLogs) { qs, last, logs ->
+            combine(
+                sync.queueSize,
+                sync.lastSuccess,
+                sync.recentLogs,
+                sessionManager.isAdminFlow
+            ) { qs, last, logs, isAdmin ->
                 _state.value.copy(
                     queueSize = qs,
                     lastSuccessAt = last?.timestamp,
                     logs = logs,
                     deviceId = config.deviceId,
                     intervalMinutes = config.syncIntervalMinutes,
+                    isAdmin = isAdmin,
                 )
             }.collect { _state.value = it }
         }
@@ -67,6 +78,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun sendTestData() {
+        if (!sessionManager.isAdmin()) return
         // ... (existing code)
     }
 

@@ -108,13 +108,15 @@ fun DashboardScreen(
                 Text(stringResource(R.string.sync_now)) 
             }
 
-            OutlinedButton(
-                onClick = vm::sendTestData,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text(stringResource(R.string.send_test_data))
+            if (s.isAdmin) {
+                OutlinedButton(
+                    onClick = vm::sendTestData,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Text(stringResource(R.string.send_test_data))
+                }
             }
 
             TextButton(

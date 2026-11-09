@@ -29,9 +29,13 @@ class SessionManager @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(!getToken().isNullOrBlank())
     val isLoggedInFlow: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
+    private val _isAdmin = MutableStateFlow(JwtUtils.isAdmin(getToken()))
+    val isAdminFlow: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
     fun saveToken(token: String) {
         prefs.edit().putString("auth_token", token).apply()
-        _isLoggedIn.value = true
+        _isLoggedIn.value = !token.isBlank()
+        _isAdmin.value = JwtUtils.isAdmin(token)
     }
 
     fun getToken(): String? {
@@ -42,8 +46,13 @@ class SessionManager @Inject constructor(
         return !getToken().isNullOrBlank()
     }
 
+    fun isAdmin(): Boolean {
+        return JwtUtils.isAdmin(getToken())
+    }
+
     fun clear() {
         prefs.edit().clear().apply()
         _isLoggedIn.value = false
+        _isAdmin.value = false
     }
 }
