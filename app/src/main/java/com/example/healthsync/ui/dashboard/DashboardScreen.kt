@@ -18,9 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
 import com.example.healthsync.data.local.SyncLogEntity
 import com.example.healthsync.domain.model.SyncPayload
+import com.example.healthsync.util.DateUtils
 import kotlinx.serialization.json.Json
-import java.text.DateFormat
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +30,7 @@ fun DashboardScreen(
     vm: DashboardViewModel = hiltViewModel(),
 ) {
     val s by vm.state.collectAsState()
-    val df = remember { DateFormat.getDateTimeInstance() }
+    val isPersian = DateUtils.isPersianMode()
     val sheetState = rememberModalBottomSheetState()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -113,7 +112,7 @@ fun DashboardScreen(
                     Text(
                         stringResource(
                             R.string.last_sync_label,
-                            s.lastSuccessAt?.let { df.format(Date(it)) } ?: stringResource(R.string.never)
+                            s.lastSuccessAt?.let { DateUtils.formatDateTime(it, isPersian) } ?: stringResource(R.string.never)
                         ),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -188,7 +187,7 @@ fun DashboardScreen(
                             },
                             trailingContent = { 
                                 Text(
-                                    df.format(Date(log.timestamp)),
+                                    DateUtils.formatDateTime(log.timestamp, isPersian),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color.Gray
                                 ) 
@@ -254,8 +253,13 @@ fun SyncLogDetailSheet(
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.Gray
                 )
+                val isPersian = DateUtils.isPersianMode()
                 Text(
-                    text = stringResource(R.string.time_range_format, payload.window.from, payload.window.to),
+                    text = stringResource(
+                        R.string.time_range_format,
+                        DateUtils.formatIsoDateTime(payload.window.from, isPersian),
+                        DateUtils.formatIsoDateTime(payload.window.to, isPersian)
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
             } else {
