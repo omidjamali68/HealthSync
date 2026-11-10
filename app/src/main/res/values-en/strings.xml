@@ -20,6 +20,7 @@
     <string name="invalid_mobile">Mobile number is invalid</string>
     <string name="invalid_code_length">Verification code must be 6 digits</string>
     <string name="error_getting_token">Error receiving authentication token</string>
+    <string name="waiting_for_sms">Waiting for verification code SMS…</string>
 
     <!-- Permissions -->
     <string name="health_connect">Health Connect</string>

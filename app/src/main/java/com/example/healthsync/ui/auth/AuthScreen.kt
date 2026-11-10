@@ -1,7 +1,12 @@
 package com.example.healthsync.ui.auth
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,13 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
+import com.example.healthsync.util.SmsOtpParser
+import com.example.healthsync.util.SmsOtpReceiver
 
 @Composable
 fun AuthScreen(
@@ -122,6 +132,30 @@ fun LoginStage(state: AuthUiState, viewModel: AuthViewModel) {
 
 @Composable
 fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
+    val context = LocalContext.current
+
+    val smsConsentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val message = result.data?.getStringExtra(SmsOtpReceiver.EXTRA_SMS_MESSAGE)
+            val code = SmsOtpParser.extractOtpCode(message)
+            if (code != null) {
+                viewModel.onOtpAutoFilled(code)
+            }
+        }
+    }
+
+    DisposableEffect(context) {
+        SmsOtpReceiver.startSmsUserConsent(context)
+        val receiver = SmsOtpReceiver.register(context) { consentIntent: Intent ->
+            smsConsentLauncher.launch(consentIntent)
+        }
+        onDispose {
+            SmsOtpReceiver.unregister(context, receiver)
+        }
+    }
+
     Text(
         text = stringResource(R.string.enter_verification_code),
         style = MaterialTheme.typography.titleLarge,
@@ -133,38 +167,18 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
         style = MaterialTheme.typography.bodyMedium,
         color = Color.Gray
     )
-    Spacer(modifier = Modifier.height(32.dp))
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        text = stringResource(R.string.waiting_for_sms),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary
+    )
+    Spacer(modifier = Modifier.height(24.dp))
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        val focusRequesters = remember { List(6) { FocusRequester() } }
-
-        state.verificationCode.forEachIndexed { index, char ->
-            OutlinedTextField(
-                value = char,
-                onValueChange = {
-                    if (it.length <= 1) {
-                        viewModel.onVerificationCodeChange(index, it)
-                        if (it.isNotEmpty() && index < 5) {
-                            focusRequesters[index + 1].requestFocus()
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .width(45.dp)
-                    .focusRequester(focusRequesters[index]),
-                textStyle = LocalTextStyle.current.copy(
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = MaterialTheme.shapes.small
-            )
-        }
-    }
+    OtpInputField(
+        otpText = state.verificationCode,
+        onOtpTextChange = viewModel::onVerificationCodeChange
+    )
 
     Spacer(modifier = Modifier.height(24.dp))
 
@@ -181,7 +195,7 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
     Button(
         onClick = viewModel::login,
         modifier = Modifier.fillMaxWidth().height(50.dp),
-        enabled = !state.isLoading && state.verificationCode.all { it.isNotEmpty() },
+        enabled = !state.isLoading && state.verificationCode.length == 6,
         shape = MaterialTheme.shapes.medium
     ) {
         Text(stringResource(R.string.verify_and_login))
@@ -191,5 +205,66 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
         TextButton(onClick = viewModel::sendCode) {
             Text(stringResource(R.string.resend_code), color = MaterialTheme.colorScheme.secondary)
         }
+    }
+}
+
+@Composable
+fun OtpInputField(
+    otpText: String,
+    otpCount: Int = 6,
+    onOtpTextChange: (String) -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        BasicTextField(
+            value = otpText,
+            onValueChange = { newValue ->
+                val filtered = newValue.filter { it.isDigit() }
+                if (filtered.length <= otpCount) {
+                    onOtpTextChange(filtered)
+                }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            modifier = Modifier.focusRequester(focusRequester),
+            decorationBox = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(otpCount) { index ->
+                        val char = when {
+                            index < otpText.length -> otpText[index].toString()
+                            else -> ""
+                        }
+                        val isFocused = index == otpText.length || (index == otpCount - 1 && otpText.length == otpCount)
+
+                        OutlinedTextField(
+                            value = char,
+                            onValueChange = {},
+                            readOnly = true,
+                            enabled = false,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                disabledBorderColor = if (isFocused) MaterialTheme.colorScheme.primary else Color.LightGray,
+                                disabledContainerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            modifier = Modifier.width(45.dp),
+                            textStyle = LocalTextStyle.current.copy(
+                                textAlign = TextAlign.Center,
+                                fontSize = 18.sp
+                            ),
+                            singleLine = true,
+                            shape = MaterialTheme.shapes.small
+                        )
+                    }
+                }
+            }
+        )
     }
 }

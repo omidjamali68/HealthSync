@@ -32,11 +32,19 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun onVerificationCodeChange(index: Int, value: String) {
-        if (value.length <= 1) {
-            val newCode = _uiState.value.verificationCode.toMutableList()
-            newCode[index] = value
-            _uiState.update { it.copy(verificationCode = newCode, error = null) }
+    fun onVerificationCodeChange(code: String) {
+        val filtered = code.filter { it.isDigit() }.take(6)
+        _uiState.update { it.copy(verificationCode = filtered, error = null) }
+        if (filtered.length == 6) {
+            login()
+        }
+    }
+
+    fun onOtpAutoFilled(code: String) {
+        val filtered = code.filter { it.isDigit() }.take(6)
+        if (filtered.length == 6) {
+            _uiState.update { it.copy(verificationCode = filtered, error = null) }
+            login()
         }
     }
 
@@ -61,7 +69,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun login() {
-        val codeString = _uiState.value.verificationCode.joinToString("")
+        val codeString = _uiState.value.verificationCode
         if (codeString.length != 6) {
             _uiState.update { it.copy(error = UiText.StringResource(R.string.invalid_code_length)) }
             return
@@ -105,7 +113,7 @@ class AuthViewModel @Inject constructor(
 
 data class AuthUiState(
     val mobileNumber: String = "",
-    val verificationCode: List<String> = List(6) { "" },
+    val verificationCode: String = "",
     val timerSeconds: Int = 0,
     val isLoading: Boolean = false,
     val isCodeSent: Boolean = false,
