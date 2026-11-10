@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -162,11 +164,34 @@ fun VerificationStage(state: AuthUiState, viewModel: AuthViewModel) {
         color = MaterialTheme.colorScheme.primary
     )
     Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = stringResource(R.string.code_sent_to, state.mobileNumber),
-        style = MaterialTheme.typography.bodyMedium,
-        color = Color.Gray
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.code_sent_to, state.mobileNumber),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        TextButton(
+            onClick = viewModel::editMobileNumber,
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = stringResource(R.string.edit_mobile_number),
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = stringResource(R.string.edit_mobile_number),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
     Spacer(modifier = Modifier.height(8.dp))
     Text(
         text = stringResource(R.string.waiting_for_sms),

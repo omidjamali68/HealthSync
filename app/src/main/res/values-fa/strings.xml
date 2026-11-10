@@ -21,6 +21,7 @@
     <string name="invalid_code_length">کد تایید باید 6 رقم باشد</string>
     <string name="error_getting_token">خطا در دریافت توکن</string>
     <string name="waiting_for_sms">در حال دریافت خودکار کد تایید از پیامک…</string>
+    <string name="edit_mobile_number">اصلاح شماره</string>
 
     <!-- Permissions -->
     <string name="health_connect">هلث کانکت (Health Connect)</string>

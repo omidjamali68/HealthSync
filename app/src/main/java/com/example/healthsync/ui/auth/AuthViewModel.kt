@@ -32,6 +32,18 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun editMobileNumber() {
+        timerJob?.cancel()
+        _uiState.update {
+            it.copy(
+                isCodeSent = false,
+                verificationCode = "",
+                timerSeconds = 0,
+                error = null
+            )
+        }
+    }
+
     fun onVerificationCodeChange(code: String) {
         val filtered = code.filter { it.isDigit() }.take(6)
         _uiState.update { it.copy(verificationCode = filtered, error = null) }
