@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">HealthSync</string>
+    <string name="app_name">TebData Life</string>
     <string name="teb_data">TebData</string>
 
     <!-- Onboarding -->
-    <string name="welcome_title">Welcome to HealthSync</string>
-    <string name="welcome_desc">HealthSync reads your heart rate and step data from Android Health Connect and securely uploads it to your configured server.</string>
+    <string name="welcome_title">Welcome to TebData Life</string>
+    <string name="welcome_desc">TebData Life reads your heart rate and step data from Android Health Connect and securely uploads it to your configured server.</string>
     <string name="onboarding_points">• Data leaves your device only to the endpoint you configure.\n• Your API token is stored in encrypted storage.\n• Sync runs in the background on your chosen interval.</string>
     <string name="get_started">Get started</string>
 
@@ -27,12 +27,12 @@
     <string name="health_connect">Health Connect</string>
     <string name="health_connect_not_supported">Health Connect is not supported on this device.</string>
     <string name="health_connect_update_required">Please install or update the Health Connect app from Play Store, then return here.</string>
-    <string name="permissions_explanation">HealthSync needs permission to read:\n• Heart rate and resting heart rate\n• Daily steps\n• Blood pressure\n• Blood oxygen\n• Sleep sessions</string>
+    <string name="permissions_explanation">TebData Life needs permission to read:\n• Heart rate and resting heart rate\n• Daily steps\n• Blood pressure\n• Blood oxygen\n• Sleep sessions</string>
     <string name="all_permissions_granted">All required permissions are granted.</string>
     <string name="grant_permissions">Grant Health Connect permissions</string>
     <string name="continue_button">Continue</string>
     <string name="background_sync_title">To enable Background Sync:</string>
-    <string name="background_sync_instructions">1. Open Health Connect settings.\n2. Select HealthSync app.\n3. Enable Additional Access at the bottom of the page.</string>
+    <string name="background_sync_instructions">1. Open Health Connect settings.\n2. Select TebData Life app.\n3. Enable Additional Access at the bottom of the page.</string>
     <string name="open_health_connect_settings">Open Health Connect Settings</string>
 
     <!-- Dashboard -->

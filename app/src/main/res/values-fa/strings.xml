@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">هلث‌سینک</string>
+    <string name="app_name">طب‌دیتا لایف</string>
     <string name="teb_data">طب دیتا</string>
 
     <!-- Onboarding -->
-    <string name="welcome_title">به هلث‌سینک خوش آمدید</string>
-    <string name="welcome_desc">هلث‌سینک داده‌های ضربان قلب و گام‌های شما را از Android Health Connect خوانده و به‌صورت امن در سرور پیکربندی شده شما بارگذاری می‌کند.</string>
+    <string name="welcome_title">به طب‌دیتا لایف خوش آمدید</string>
+    <string name="welcome_desc">طب‌دیتا لایف داده‌های ضربان قلب و گام‌های شما را از Android Health Connect خوانده و به‌صورت امن در سرور پیکربندی شده شما بارگذاری می‌کند.</string>
     <string name="onboarding_points">• داده‌ها فقط به مقصد تعیین شده توسط شما ارسال می‌شوند.\n• توکن API شما در فضای ذخیره‌سازی رمزگذاری شده نگهداری می‌شود.\n• همگام‌سازی در پس‌زمینه و در بازه‌های زمانی انتخابی شما انجام می‌شود.</string>
     <string name="get_started">شروع کنید</string>
 
@@ -27,12 +27,12 @@
     <string name="health_connect">هلث کانکت (Health Connect)</string>
     <string name="health_connect_not_supported">هلث کانکت در این دستگاه پشتیبانی نمی‌شود.</string>
     <string name="health_connect_update_required">لطفاً اپلیکیشن Health Connect را از پلی استور نصب یا به‌روزرسانی کنید، سپس به اینجا بازگردید.</string>
-    <string name="permissions_explanation">هلث‌سینک برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب و ضربان قلب استراحت\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
+    <string name="permissions_explanation">طب‌دیتا لایف برای خواندن موارد زیر به دسترسی نیاز دارد:\n• ضربان قلب و ضربان قلب استراحت\n• گام‌های روزانه\n• فشار خون\n• اکسیژن خون\n• وضعیت خواب</string>
     <string name="all_permissions_granted">تمامی دسترسی‌های لازم داده شده است.</string>
     <string name="grant_permissions">اعطای دسترسی‌های هلث کانکت</string>
     <string name="continue_button">ادامه</string>
     <string name="background_sync_title">برای فعال‌سازی ارسال در پس‌زمینه (Background Sync):</string>
-    <string name="background_sync_instructions">۱. وارد تنظیمات Health Connect شوید.\n۲. اپلیکیشن HealthSync را انتخاب کنید.\n۳. در پایین صفحه گزینه Additional Access را فعال کنید.</string>
+    <string name="background_sync_instructions">۱. وارد تنظیمات Health Connect شوید.\n۲. اپلیکیشن TebData Life را انتخاب کنید.\n۳. در پایین صفحه گزینه Additional Access را فعال کنید.</string>
     <string name="open_health_connect_settings">باز کردن تنظیمات Health Connect</string>
 
     <!-- Dashboard -->
