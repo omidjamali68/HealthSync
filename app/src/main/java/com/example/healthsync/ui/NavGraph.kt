@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.healthsync.ui.auth.AuthScreen
 import com.example.healthsync.ui.dashboard.DashboardScreen
+import com.example.healthsync.ui.healthrecord.HealthRecordScreen
 import com.example.healthsync.ui.onboarding.OnboardingScreen
 import com.example.healthsync.ui.permissions.PermissionsScreen
 import com.example.healthsync.ui.settings.SettingsScreen
@@ -16,6 +17,7 @@ object Routes {
     const val PERMISSIONS = "permissions"
     const val SETTINGS = "settings"
     const val DASHBOARD = "dashboard"
+    const val HEALTH_RECORD = "health_record"
 }
 
 @Composable
@@ -48,11 +50,17 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
             DashboardScreen(
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenPermissions = { navController.navigate(Routes.PERMISSIONS) },
+                onOpenHealthRecord = { navController.navigate(Routes.HEALTH_RECORD) },
                 onLogout = {
                     navController.navigate(Routes.AUTH) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+        composable(Routes.HEALTH_RECORD) {
+            HealthRecordScreen(
+                onBack = { navController.popBackStack() }
             )
         }
     }

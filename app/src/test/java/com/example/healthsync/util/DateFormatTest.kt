@@ -16,6 +16,28 @@ class DateFormatTest {
     }
 
     @Test
+    fun testRoundTrip_1405_08_20() {
+        val (gy, gm, gd) = DateUtils.jalaliToGregorian(1405, 8, 20)
+        val (jy, jm, jd) = DateUtils.gregorianToJalali(gy, gm, gd)
+        assertEquals(1405, jy)
+        assertEquals(8, jm)
+        assertEquals(20, jd)
+    }
+
+    @Test
+    fun testConvertJalaliStringToGregorian() {
+        val gDate = DateUtils.convertJalaliStringToGregorian("1405/08/20")
+        val (jy, jm, jd) = DateUtils.gregorianToJalali(
+            gDate.split("-")[0].toInt(),
+            gDate.split("-")[1].toInt(),
+            gDate.split("-")[2].toInt()
+        )
+        assertEquals(1405, jy)
+        assertEquals(8, jm)
+        assertEquals(20, jd)
+    }
+
+    @Test
     fun testMarch21_2026_JalaliConversion() {
         val (jy, jm, jd) = DateUtils.gregorianToJalali(2026, 3, 21)
         println("2026-03-21 -> $jy/$jm/$jd")

@@ -3,6 +3,7 @@ package com.example.healthsync.util
 import androidx.appcompat.app.AppCompatDelegate
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -63,6 +64,81 @@ object DateUtils {
         return intArrayOf(jy, jm, jd)
     }
 
+    fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): IntArray {
+        val jy1 = jy - 979
+        val jm1 = jm - 1
+        val jd1 = jd - 1
+
+        var jDayNo = 365 * jy1 + (jy1 / 33) * 8 + ((jy1 % 33) + 3) / 4
+        val daysInJMonth = intArrayOf(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29)
+        for (i in 0 until jm1) {
+            jDayNo += daysInJMonth[i]
+        }
+        jDayNo += jd1
+
+        var gDayNo = jDayNo + 79
+
+        var gy = 1600 + 400 * (gDayNo / 146097)
+        gDayNo %= 146097
+
+        var leap = true
+        if (gDayNo >= 36525) {
+            gDayNo--
+            gy += 100 * (gDayNo / 36524)
+            gDayNo %= 36524
+            if (gDayNo >= 365) {
+                gDayNo++
+            } else {
+                leap = false
+            }
+        }
+
+        gy += 4 * (gDayNo / 1461)
+        gDayNo %= 1461
+
+        if (gDayNo >= 366) {
+            leap = false
+            gDayNo--
+            gy += gDayNo / 365
+            gDayNo %= 365
+        }
+
+        val gDaysInMonth = intArrayOf(0, 31, if (leap && ((gy % 4 == 0 && gy % 100 != 0) || (gy % 400 == 0))) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+        var gm = 0
+        while (gm < 12 && gDayNo >= gDaysInMonth[gm + 1]) {
+            gDayNo -= gDaysInMonth[gm + 1]
+            gm++
+        }
+        val gd = gDayNo + 1
+        return intArrayOf(gy, gm + 1, gd)
+    }
+
+    fun convertJalaliStringToGregorian(dateStr: String): String {
+        val clean = dateStr.trim().toEnglishDigits()
+        if (clean.isBlank()) return ""
+        val parts = clean.split("/", "-")
+        if (parts.size == 3) {
+            val y = parts[0].toIntOrNull() ?: return dateStr
+            val m = parts[1].toIntOrNull() ?: return dateStr
+            val d = parts[2].toIntOrNull() ?: return dateStr
+            if (y in 1300..1500 && m in 1..12 && d in 1..31) {
+                val (gy, gm, gd) = jalaliToGregorian(y, m, d)
+                return String.format(Locale.ROOT, "%04d-%02d-%02d", gy, gm, gd)
+            }
+        }
+        return dateStr
+    }
+
+    fun String.toEnglishDigits(): String {
+        val persianDigits = charArrayOf('۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹')
+        val arabicDigits = charArrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+        var result = this
+        for (i in 0..9) {
+            result = result.replace(persianDigits[i], ('0' + i)).replace(arabicDigits[i], ('0' + i))
+        }
+        return result
+    }
+
     fun String.toPersianDigits(): String {
         val persianDigits = charArrayOf('۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹')
         val sb = StringBuilder()
@@ -82,24 +158,38 @@ object DateUtils {
     }
 
     fun formatIsoDateTime(isoString: String, isPersian: Boolean = isPersianMode()): String {
+        if (isoString.isBlank()) return ""
         val zdt = parseIsoToZonedDateTime(isoString) ?: return if (isPersian) isoString.toPersianDigits() else isoString
-        val hasTime = isoString.contains("T")
+        val hasTime = isoString.contains("T") || isoString.contains(" ")
         return formatZonedDateTime(zdt, isPersian, includeTime = hasTime)
     }
 
     fun parseIsoToZonedDateTime(isoString: String): ZonedDateTime? {
+        val clean = isoString.trim()
+        if (clean.isBlank()) return null
+        val normalized = clean.replace(" ", "T").replace("/", "-")
         return runCatching {
-            ZonedDateTime.parse(isoString)
+            if (normalized.endsWith("Z", ignoreCase = true) ||
+                normalized.substringAfter("T", "").contains("+") ||
+                normalized.substringAfter("T", "").contains("-")) {
+                ZonedDateTime.parse(normalized).withZoneSameInstant(ZoneId.systemDefault())
+            } else {
+                LocalDateTime.parse(normalized).atZone(ZoneId.systemDefault())
+            }
         }.getOrElse {
             runCatching {
-                Instant.parse(isoString).atZone(ZoneId.systemDefault())
+                Instant.parse(normalized).atZone(ZoneId.systemDefault())
             }.getOrElse {
                 runCatching {
-                    OffsetDateTime.parse(isoString).toZonedDateTime()
+                    OffsetDateTime.parse(normalized).toZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
                 }.getOrElse {
                     runCatching {
-                        LocalDate.parse(isoString).atStartOfDay(ZoneId.systemDefault())
-                    }.getOrNull()
+                        LocalDateTime.parse(normalized).atZone(ZoneId.systemDefault())
+                    }.getOrElse {
+                        runCatching {
+                            LocalDate.parse(normalized).atStartOfDay(ZoneId.systemDefault())
+                        }.getOrNull()
+                    }
                 }
             }
         }

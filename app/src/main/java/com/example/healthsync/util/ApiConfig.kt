@@ -14,4 +14,11 @@ object ApiConfig {
     // Auth endpoints (prefixed with the API path)
     const val AUTH_SEND_CODE = "api/auth/send-verification-code"
     const val AUTH_LOGIN = "api/auth/register-or-login"
+
+    // Health record endpoints
+    const val HEALTH_RECORDS = "api/health-records"
+    const val HEALTH_RECORDS_METRIC_TYPES = "api/health-records/metric-types"
+    const val HEALTH_RECORDS_METRIC_COMPONENTS = "api/health-records/metric-components"
+    const val HEALTH_RECORDS_BY_USER = "api/health-records/by-user"
+    const val HEALTH_INSIGHTS_LAST = "api/health-insights/last"
 }

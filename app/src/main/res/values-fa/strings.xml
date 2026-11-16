@@ -81,4 +81,32 @@
     <string name="logout_confirm">آیا مطمئن هستید که می‌خواهید خارج شوید؟</string>
     <string name="cancel">انصراف</string>
     <string name="account_management">مدیریت حساب</string>
+
+    <!-- Health Record -->
+    <string name="health_record_title">ثبت پایش سلامت</string>
+    <string name="health_record_tab">پایش سلامت</string>
+    <string name="new_record">ثبت جدید</string>
+    <string name="record_history">تاریخچه پایش‌ها</string>
+    <string name="select_metric_type">انتخاب نوع شاخص</string>
+    <string name="latest_insight">آخرین تحلیل هوش مصنوعی</string>
+    <string name="get_latest_insight">دریافت تحلیل هوش مصنوعی</string>
+    <string name="request_new_insight">درخواست تحلیل جدید</string>
+    <string name="insight_daily_limit_notice">درخواست تحلیل هوشمند ارسال شد. (محدودیت: ۳ درخواست در روز)</string>
+    <string name="insight_limit_hint">محدودیت درخواست جدید: حداکثر ۳ بار در روز</string>
+    <string name="submit_record">ثبت پایش سلامت</string>
+    <string name="no_records_found">هیچ پایش سلامتی ثبت نشده است.</string>
+    <string name="delete">حذف</string>
+    <string name="delete_record_confirm">آیا از حذف این پایش اطمینان دارید؟</string>
+    <string name="filter_date_label">فیلتر تاریخ</string>
+    <string name="filter_metric_label">فیلتر شاخص</string>
+    <string name="apply_filter">اعمال فیلتر</string>
+    <string name="clear_filter">پاک کردن فیلتر</string>
+    <string name="details">جزئیات و ویرایش</string>
+    <string name="record_details_title">جزئیات و ویرایش پایش سلامت</string>
+    <string name="save_changes">ذخیره تغییرات</string>
+    <string name="page_indicator">صفحه %1$d از %2$d (کل: %3$d)</string>
+    <string name="previous">قبلی</string>
+    <string name="next">بعدی</string>
+    <string name="close">بستن</string>
+    <string name="confirm">تایید</string>
 </resources>

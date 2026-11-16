@@ -5,14 +5,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Devices
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
@@ -26,6 +36,7 @@ import kotlinx.serialization.json.Json
 fun DashboardScreen(
     onOpenSettings: () -> Unit,
     onOpenPermissions: () -> Unit,
+    onOpenHealthRecord: () -> Unit = {},
     onLogout: () -> Unit,
     vm: DashboardViewModel = hiltViewModel(),
 ) {
@@ -68,8 +79,17 @@ fun DashboardScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.sync_dashboard), color = Color.White) },
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.sync_dashboard),
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(
@@ -80,10 +100,41 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onOpenPermissions) { Text(stringResource(R.string.permissions_tab), color = Color.White) }
-                    TextButton(onClick = onOpenSettings) { Text(stringResource(R.string.settings_tab), color = Color.White) }
+                    TextButton(
+                        onClick = onOpenHealthRecord,
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.health_record_tab),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    TextButton(
+                        onClick = onOpenPermissions,
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.permissions_tab),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    TextButton(
+                        onClick = onOpenSettings,
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.settings_tab),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             )
@@ -97,42 +148,100 @@ fun DashboardScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Hero Status Card
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
             ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(R.string.status_label),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            )
+                            Text(
+                                stringResource(R.string.status_label),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
+
+                    StatusItemRow(
+                        icon = Icons.Default.Devices,
+                        label = stringResource(R.string.device_id_label, s.deviceId)
                     )
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    Text(stringResource(R.string.device_id_label, s.deviceId), style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        stringResource(
+                    StatusItemRow(
+                        icon = Icons.Default.CloudDone,
+                        label = stringResource(
                             R.string.last_sync_label,
                             s.lastSuccessAt?.let { DateUtils.formatDateTime(it, isPersian) } ?: stringResource(R.string.never)
-                        ),
-                        style = MaterialTheme.typography.bodyMedium
+                        )
                     )
-                    Text(stringResource(R.string.pending_batches_label, s.queueSize), style = MaterialTheme.typography.bodyMedium)
-                    Text(stringResource(R.string.sync_interval_label, s.intervalMinutes), style = MaterialTheme.typography.bodyMedium)
+                    StatusItemRow(
+                        icon = Icons.Default.FormatListNumbered,
+                        label = stringResource(R.string.pending_batches_label, s.queueSize)
+                    )
+                    StatusItemRow(
+                        icon = Icons.Default.AccessTime,
+                        label = stringResource(R.string.sync_interval_label, s.intervalMinutes)
+                    )
                 }
             }
             
-            Button(
-                onClick = vm::syncNow,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = MaterialTheme.shapes.medium
-            ) { 
-                Text(stringResource(R.string.sync_now)) 
+            // Quick Actions Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Button(
+                    onClick = vm::syncNow,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Text(stringResource(R.string.sync_now), fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                FilledTonalButton(
+                    onClick = onOpenHealthRecord,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Text(stringResource(R.string.health_record_title), fontWeight = FontWeight.Bold)
+                    }
+                }
             }
 
             if (s.isAdmin) {
                 OutlinedButton(
                     onClick = vm::sendTestData,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
                 ) {
@@ -150,30 +259,36 @@ fun DashboardScreen(
             Text(
                 stringResource(R.string.recent_activity),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp)
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
             )
 
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth().weight(1f),
-                colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(s.logs, key = { it.id }) { log ->
                         ListItem(
-                            modifier = Modifier.clickable { vm.selectLog(log) },
+                            modifier = Modifier
+                                .clickable { vm.selectLog(log) }
+                                .padding(vertical = 2.dp),
                             headlineContent = {
                                 Surface(
                                     color = if (log.success) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
-                                    shape = RoundedCornerShape(4.dp)
+                                    shape = RoundedCornerShape(6.dp)
                                 ) {
                                     Text(
                                         text = stringResource(if (log.success) R.string.success else R.string.failed),
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
                                         style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
                                         color = if (log.success) Color(0xFF2E7D32) else Color(0xFFC62828)
                                     )
                                 }
@@ -198,6 +313,30 @@ fun DashboardScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun StatusItemRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -229,6 +368,7 @@ fun SyncLogDetailSheet(
             Text(
                 text = stringResource(R.string.sync_log_detail_title),
                 style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
 

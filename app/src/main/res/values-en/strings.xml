@@ -81,4 +81,32 @@
     <string name="logout_confirm">Are you sure you want to logout?</string>
     <string name="cancel">Cancel</string>
     <string name="account_management">Account Management</string>
+
+    <!-- Health Record -->
+    <string name="health_record_title">Health Monitoring</string>
+    <string name="health_record_tab">Health Record</string>
+    <string name="new_record">New Record</string>
+    <string name="record_history">Record History</string>
+    <string name="select_metric_type">Select Metric Type</string>
+    <string name="latest_insight">Latest AI Insight</string>
+    <string name="get_latest_insight">Get AI Insight</string>
+    <string name="request_new_insight">Request New Insight</string>
+    <string name="insight_daily_limit_notice">New insight request sent. (Daily limit: 3 requests per day)</string>
+    <string name="insight_limit_hint">Daily limit: max 3 requests per day</string>
+    <string name="submit_record">Register Health Record</string>
+    <string name="no_records_found">No health records found.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_record_confirm">Are you sure you want to delete this record?</string>
+    <string name="filter_date_label">Date Filter</string>
+    <string name="filter_metric_label">Metric Filter</string>
+    <string name="apply_filter">Apply Filter</string>
+    <string name="clear_filter">Clear Filter</string>
+    <string name="details">Details &amp; Edit</string>
+    <string name="record_details_title">Health Record Details &amp; Edit</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="page_indicator">Page %1$d of %2$d (Total: %3$d)</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="close">Close</string>
+    <string name="confirm">Confirm</string>
 </resources>
