@@ -109,4 +109,50 @@
     <string name="next">Next</string>
     <string name="close">Close</string>
     <string name="confirm">Confirm</string>
+
+    <!-- Medical Record -->
+    <string name="medical_records_title">Medical Records</string>
+    <string name="medical_records_tab">Medical Records</string>
+    <string name="new_medical_record">New Record</string>
+    <string name="edit_medical_record">Edit Medical Record</string>
+    <string name="medical_records_history">Records History</string>
+    <string name="record_title">Record Title</string>
+    <string name="record_category">Category</string>
+    <string name="record_date">Record Date</string>
+    <string name="description">Description</string>
+    <string name="doctor_name">Doctor Name</string>
+    <string name="center_name">Medical Center / Lab Name</string>
+    <string name="attached_files">Attached Files</string>
+    <string name="add_files">Select Files / Images</string>
+    <string name="no_medical_records_found">No medical records found.</string>
+    <string name="ai_interpretation">AI Interpretation</string>
+    <string name="interpret_file">Interpret File with AI</string>
+    <string name="re_interpret_file">Re-interpret</string>
+    <string name="file_interpretation_title">AI File Interpretation Result</string>
+    <string name="delete_medical_record_confirm">Are you sure you want to delete this medical record?</string>
+    <string name="search_placeholder">Search title or description…</string>
+    <string name="all_categories">All Categories</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_health_record">Health Monitor</string>
+    <string name="nav_medical_record">Medical Record</string>
+
+    <!-- Medical Record Form Web Style -->
+    <string name="add_medical_history_title">Add New Medical Record</string>
+    <string name="title_placeholder">e.g., Blood test or general checkup…</string>
+    <string name="category_select_placeholder">Select…</string>
+    <string name="description_placeholder">Description regarding record…</string>
+    <string name="voice_mic_permission_hint">To use voice recording, grant microphone permission</string>
+    <string name="date_select_placeholder">Select date…</string>
+    <string name="no_file_selected">No file selected</string>
+    <string name="select_file">Select File</string>
+    <string name="save_button">Save</string>
+    <string name="back_button">Back</string>
+
+    <!-- Filter Web Style -->
+    <string name="filter_title_category_label">Filter by title or category:</string>
+    <string name="filter_title_category_placeholder">Title or category…</string>
+    <string name="filter_date_header_label">Filter by date:</string>
+    <string name="filter_date_placeholder">Select date…</string>
 </resources>

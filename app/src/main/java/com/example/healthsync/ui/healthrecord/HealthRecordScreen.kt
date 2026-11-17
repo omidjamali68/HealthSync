@@ -46,6 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
 import com.example.healthsync.domain.model.HealthMetricViewModel
 import com.example.healthsync.domain.model.HealthRecordIndexViewModel
+import com.example.healthsync.ui.Routes
+import com.example.healthsync.ui.components.AppBottomNavigation
 import com.example.healthsync.util.DateUtils
 import com.example.healthsync.util.DateUtils.toPersianDigits
 import java.time.Instant
@@ -83,6 +85,7 @@ private fun getMetricIconAndColor(code: String, title: String): Pair<ImageVector
 @Composable
 fun HealthRecordScreen(
     onBack: () -> Unit,
+    onNavigateToRoute: (String) -> Unit = {},
     vm: HealthRecordViewModel = hiltViewModel()
 ) {
     val s by vm.state.collectAsState()
@@ -113,6 +116,12 @@ fun HealthRecordScreen(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
+            )
+        },
+        bottomBar = {
+            AppBottomNavigation(
+                currentRoute = Routes.HEALTH_RECORD,
+                onNavigate = onNavigateToRoute
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

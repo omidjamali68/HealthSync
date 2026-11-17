@@ -12,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Devices
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
@@ -28,6 +27,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
 import com.example.healthsync.data.local.SyncLogEntity
 import com.example.healthsync.domain.model.SyncPayload
+import com.example.healthsync.ui.Routes
+import com.example.healthsync.ui.components.AppBottomNavigation
 import com.example.healthsync.util.DateUtils
 import kotlinx.serialization.json.Json
 
@@ -36,7 +37,7 @@ import kotlinx.serialization.json.Json
 fun DashboardScreen(
     onOpenSettings: () -> Unit,
     onOpenPermissions: () -> Unit,
-    onOpenHealthRecord: () -> Unit = {},
+    onNavigateToRoute: (String) -> Unit = {},
     onLogout: () -> Unit,
     vm: DashboardViewModel = hiltViewModel(),
 ) {
@@ -101,17 +102,6 @@ fun DashboardScreen(
                 },
                 actions = {
                     TextButton(
-                        onClick = onOpenHealthRecord,
-                        contentPadding = PaddingValues(horizontal = 4.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.health_record_tab),
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    TextButton(
                         onClick = onOpenPermissions,
                         contentPadding = PaddingValues(horizontal = 4.dp)
                     ) {
@@ -139,6 +129,12 @@ fun DashboardScreen(
                 )
             )
         },
+        bottomBar = {
+            AppBottomNavigation(
+                currentRoute = Routes.DASHBOARD,
+                onNavigate = onNavigateToRoute
+            )
+        }
     ) { inner ->
         Column(
             modifier = Modifier
@@ -200,41 +196,20 @@ fun DashboardScreen(
                 }
             }
             
-            // Quick Actions Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            // Quick Action Button
+            Button(
+                onClick = vm::syncNow,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
-                Button(
-                    onClick = vm::syncNow,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = MaterialTheme.shapes.medium
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(20.dp))
-                        Text(stringResource(R.string.sync_now), fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                FilledTonalButton(
-                    onClick = onOpenHealthRecord,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    shape = MaterialTheme.shapes.medium,
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Favorite, contentDescription = null, modifier = Modifier.size(20.dp))
-                        Text(stringResource(R.string.health_record_title), fontWeight = FontWeight.Bold)
-                    }
+                    Icon(imageVector = Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Text(stringResource(R.string.sync_now), fontWeight = FontWeight.Bold)
                 }
             }
 

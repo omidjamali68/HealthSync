@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.healthsync.ui.auth.AuthScreen
 import com.example.healthsync.ui.dashboard.DashboardScreen
 import com.example.healthsync.ui.healthrecord.HealthRecordScreen
+import com.example.healthsync.ui.medicalrecord.MedicalRecordScreen
 import com.example.healthsync.ui.onboarding.OnboardingScreen
 import com.example.healthsync.ui.permissions.PermissionsScreen
 import com.example.healthsync.ui.settings.SettingsScreen
@@ -18,6 +19,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val DASHBOARD = "dashboard"
     const val HEALTH_RECORD = "health_record"
+    const val MEDICAL_RECORD = "medical_record"
 }
 
 @Composable
@@ -50,7 +52,11 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
             DashboardScreen(
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                 onOpenPermissions = { navController.navigate(Routes.PERMISSIONS) },
-                onOpenHealthRecord = { navController.navigate(Routes.HEALTH_RECORD) },
+                onNavigateToRoute = { targetRoute ->
+                    if (targetRoute != Routes.DASHBOARD) {
+                        navController.navigate(targetRoute)
+                    }
+                },
                 onLogout = {
                     navController.navigate(Routes.AUTH) {
                         popUpTo(0) { inclusive = true }
@@ -60,7 +66,26 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
         }
         composable(Routes.HEALTH_RECORD) {
             HealthRecordScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToRoute = { targetRoute ->
+                    if (targetRoute != Routes.HEALTH_RECORD) {
+                        navController.navigate(targetRoute) {
+                            popUpTo(Routes.DASHBOARD)
+                        }
+                    }
+                }
+            )
+        }
+        composable(Routes.MEDICAL_RECORD) {
+            MedicalRecordScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToRoute = { targetRoute ->
+                    if (targetRoute != Routes.MEDICAL_RECORD) {
+                        navController.navigate(targetRoute) {
+                            popUpTo(Routes.DASHBOARD)
+                        }
+                    }
+                }
             )
         }
     }

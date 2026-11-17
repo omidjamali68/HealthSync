@@ -8,6 +8,7 @@ import com.example.healthsync.data.local.AppDatabase
 import com.example.healthsync.data.local.SyncLogDao
 import com.example.healthsync.data.local.SyncQueueDao
 import com.example.healthsync.data.remote.HealthApi
+import com.example.healthsync.data.remote.MedicalRecordApi
 import com.example.healthsync.util.ApiConfig
 import dagger.Module
 import dagger.Provides
@@ -31,6 +32,8 @@ object AppModule {
     fun provideJson(): Json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
+        isLenient = true
+        coerceInputValues = true
     }
 
     @Provides @Singleton
@@ -58,6 +61,9 @@ object AppModule {
 
     @Provides @Singleton
     fun provideHealthApi(retrofit: Retrofit): HealthApi = retrofit.create(HealthApi::class.java)
+
+    @Provides @Singleton
+    fun provideMedicalRecordApi(retrofit: Retrofit): MedicalRecordApi = retrofit.create(MedicalRecordApi::class.java)
 
     @Provides @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =

@@ -109,4 +109,50 @@
     <string name="next">بعدی</string>
     <string name="close">بستن</string>
     <string name="confirm">تایید</string>
+
+    <!-- Medical Record -->
+    <string name="medical_records_title">پرونده‌های سلامت</string>
+    <string name="medical_records_tab">پرونده‌های سلامت</string>
+    <string name="new_medical_record">ثبت پرونده جدید</string>
+    <string name="edit_medical_record">ویرایش پرونده سلامت</string>
+    <string name="medical_records_history">تاریخچه پرونده‌ها</string>
+    <string name="record_title">عنوان پرونده</string>
+    <string name="record_category">دسته‌بندی</string>
+    <string name="record_date">تاریخ پرونده</string>
+    <string name="description">توضیحات</string>
+    <string name="doctor_name">نام پزشک</string>
+    <string name="center_name">نام مرکز درمانی / آزمایشگاه</string>
+    <string name="attached_files">فایل‌های پیوست</string>
+    <string name="add_files">انتخاب فایل / عکس</string>
+    <string name="no_medical_records_found">هیچ پرونده سلامتی ثبت نشده است.</string>
+    <string name="ai_interpretation">تحلیل هوشمند (AI)</string>
+    <string name="interpret_file">تحلیل فایل با هوش مصنوعی</string>
+    <string name="re_interpret_file">تحلیل مجدد</string>
+    <string name="file_interpretation_title">نتیجه تحلیل هوشمند فایل</string>
+    <string name="delete_medical_record_confirm">آیا از حذف این پرونده پزشکی اطمینان دارید؟</string>
+    <string name="search_placeholder">جستجو در عنوان یا توضیحات…</string>
+    <string name="all_categories">همه دسته‌بندی‌ها</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">خانه</string>
+    <string name="nav_health_record">پایش سلامت</string>
+    <string name="nav_medical_record">پرونده پزشکی</string>
+
+    <!-- Medical Record Form Web Style -->
+    <string name="add_medical_history_title">افزودن سابقه پزشکی جدید</string>
+    <string name="title_placeholder">مثل: آزمایش خون یا چکاپ عمومی…</string>
+    <string name="category_select_placeholder">انتخاب کنید…</string>
+    <string name="description_placeholder">توضیحات مربوط به سابقه…</string>
+    <string name="voice_mic_permission_hint">برای استفاده از ضبط صدا، به میکروفن دسترسی دهید</string>
+    <string name="date_select_placeholder">انتخاب تاریخ…</string>
+    <string name="no_file_selected">فایلی انتخاب نشده است</string>
+    <string name="select_file">انتخاب فایل</string>
+    <string name="save_button">ذخیره</string>
+    <string name="back_button">بازگشت</string>
+
+    <!-- Filter Web Style -->
+    <string name="filter_title_category_label">فیلتر بر اساس عنوان یا دسته‌بندی:</string>
+    <string name="filter_title_category_placeholder">عنوان یا دسته‌بندی…</string>
+    <string name="filter_date_header_label">فیلتر بر اساس تاریخ:</string>
+    <string name="filter_date_placeholder">تاریخ را انتخاب کنید…</string>
 </resources>

@@ -21,4 +21,10 @@ object ApiConfig {
     const val HEALTH_RECORDS_METRIC_COMPONENTS = "api/health-records/metric-components"
     const val HEALTH_RECORDS_BY_USER = "api/health-records/by-user"
     const val HEALTH_INSIGHTS_LAST = "api/health-insights/last"
+
+    // Medical record endpoints
+    const val MEDICAL_RECORDS = "api/medical-records"
+    const val MEDICAL_RECORDS_BY_USER = "api/medical-records/by-user"
+    const val FILES_INTERPRET_UPLOAD = "api/files/interpret-upload"
+    const val FILES_INTERPRETATION = "api/files"
 }
