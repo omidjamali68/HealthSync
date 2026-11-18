@@ -66,26 +66,12 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
         }
         composable(Routes.HEALTH_RECORD) {
             HealthRecordScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToRoute = { targetRoute ->
-                    if (targetRoute != Routes.HEALTH_RECORD) {
-                        navController.navigate(targetRoute) {
-                            popUpTo(Routes.DASHBOARD)
-                        }
-                    }
-                }
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Routes.MEDICAL_RECORD) {
             MedicalRecordScreen(
-                onBack = { navController.popBackStack() },
-                onNavigateToRoute = { targetRoute ->
-                    if (targetRoute != Routes.MEDICAL_RECORD) {
-                        navController.navigate(targetRoute) {
-                            popUpTo(Routes.DASHBOARD)
-                        }
-                    }
-                }
+                onBack = { navController.popBackStack() }
             )
         }
     }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -46,8 +47,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.healthsync.R
 import com.example.healthsync.domain.model.HealthMetricViewModel
 import com.example.healthsync.domain.model.HealthRecordIndexViewModel
-import com.example.healthsync.ui.Routes
-import com.example.healthsync.ui.components.AppBottomNavigation
 import com.example.healthsync.util.DateUtils
 import com.example.healthsync.util.DateUtils.toPersianDigits
 import java.time.Instant
@@ -85,7 +84,6 @@ private fun getMetricIconAndColor(code: String, title: String): Pair<ImageVector
 @Composable
 fun HealthRecordScreen(
     onBack: () -> Unit,
-    onNavigateToRoute: (String) -> Unit = {},
     vm: HealthRecordViewModel = hiltViewModel()
 ) {
     val s by vm.state.collectAsState()
@@ -116,12 +114,6 @@ fun HealthRecordScreen(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
-            )
-        },
-        bottomBar = {
-            AppBottomNavigation(
-                currentRoute = Routes.HEALTH_RECORD,
-                onNavigate = onNavigateToRoute
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -384,6 +376,14 @@ private fun RecordHistorySection(
     onDelete: (String) -> Unit
 ) {
     var showDatePickerDialog by remember { mutableStateOf(false) }
+    var isFilterExpanded by remember { mutableStateOf(false) }
+
+    val activeFilterCount = remember(state.searchQuery, state.filterDateQuery) {
+        var count = 0
+        if (state.searchQuery.isNotBlank()) count++
+        if (state.filterDateQuery.isNotBlank()) count++
+        count
+    }
 
     if (showDatePickerDialog) {
         if (isPersian) {
@@ -418,89 +418,147 @@ private fun RecordHistorySection(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Collapsible Filter Card
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Clickable Header to Expand/Collapse
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { isFilterExpanded = !isFilterExpanded }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
-                        value = state.searchQuery,
-                        onValueChange = onSetSearch,
-                        label = { Text(stringResource(R.string.filter_metric_label), maxLines = 1) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        shape = MaterialTheme.shapes.medium
-                    )
-                    OutlinedTextField(
-                        value = if (isPersian && state.filterDateQuery.isNotBlank()) state.filterDateQuery.toPersianDigits() else state.filterDateQuery,
-                        onValueChange = onSetFilterDate,
-                        label = { Text(stringResource(R.string.filter_date_label), maxLines = 1) },
-                        leadingIcon = {
-                            IconButton(onClick = { showDatePickerDialog = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.DateRange,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "فیلتر و جستجوی پایش‌ها",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        if (activeFilterCount > 0) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = CircleShape
+                            ) {
+                                Text(
+                                    text = "$activeFilterCount فیلتر فعال".let { if (isPersian) it.toPersianDigits() else it },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                 )
                             }
-                        },
-                        singleLine = true,
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable { showDatePickerDialog = true },
-                        shape = MaterialTheme.shapes.medium
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = onApplyFilters,
-                        modifier = Modifier.weight(1f),
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(stringResource(R.string.apply_filter))
                         }
                     }
-                    OutlinedButton(
-                        onClick = onClearFilters,
-                        modifier = Modifier.weight(1f),
-                        shape = MaterialTheme.shapes.medium
+
+                    Icon(
+                        imageVector = if (isFilterExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Collapsible Content
+                AnimatedVisibility(visible = isFilterExpanded) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                            OutlinedTextField(
+                                value = state.searchQuery,
+                                onValueChange = onSetSearch,
+                                label = { Text(stringResource(R.string.filter_metric_label), maxLines = 1) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.FilterList,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium
                             )
-                            Text(stringResource(R.string.clear_filter))
+                            OutlinedTextField(
+                                value = if (isPersian && state.filterDateQuery.isNotBlank()) state.filterDateQuery.toPersianDigits() else state.filterDateQuery,
+                                onValueChange = onSetFilterDate,
+                                label = { Text(stringResource(R.string.filter_date_label), maxLines = 1) },
+                                leadingIcon = {
+                                    IconButton(onClick = { showDatePickerDialog = true }) {
+                                        Icon(
+                                            imageVector = Icons.Default.DateRange,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { showDatePickerDialog = true },
+                                shape = MaterialTheme.shapes.medium
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    isFilterExpanded = false
+                                    onApplyFilters()
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(stringResource(R.string.apply_filter))
+                                }
+                            }
+                            OutlinedButton(
+                                onClick = onClearFilters,
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(stringResource(R.string.clear_filter))
+                                }
+                            }
                         }
                     }
                 }
