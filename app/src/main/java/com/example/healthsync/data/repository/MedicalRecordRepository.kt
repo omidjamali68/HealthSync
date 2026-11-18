@@ -11,6 +11,7 @@ import com.example.healthsync.util.ApiConfig
 import com.example.healthsync.util.DateUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -26,13 +27,14 @@ class MedicalRecordRepository @Inject constructor(
     private val api: MedicalRecordApi,
     private val config: SecureConfigStore
 ) {
-    private val baseUrl: String
+    val baseUrl: String
         get() = config.baseUrl.trimEnd('/')
 
     suspend fun getMedicalRecordsByUser(
         page: Int = 1,
         pageSize: Int = 10,
         search: String = "",
+        category: String = "",
         sortBy: String = "",
         sortDirection: String = "",
         filterDate: String = ""
@@ -42,11 +44,12 @@ class MedicalRecordRepository @Inject constructor(
                 DateUtils.convertJalaliStringToGregorian(filterDate)
             } else ""
             val encSearch = URLEncoder.encode(search, "UTF-8")
+            val encCategory = URLEncoder.encode(category, "UTF-8")
             val encSortBy = URLEncoder.encode(sortBy, "UTF-8")
             val encSortDir = URLEncoder.encode(sortDirection, "UTF-8")
             val encFilterDate = URLEncoder.encode(convertedFilterDate, "UTF-8")
 
-            val url = "$baseUrl/${ApiConfig.MEDICAL_RECORDS_BY_USER}?page=$page&pageSize=$pageSize&search=$encSearch&sortBy=$encSortBy&sortDirection=$encSortDir&filterDate=$encFilterDate"
+            val url = "$baseUrl/${ApiConfig.MEDICAL_RECORDS_BY_USER}?page=$page&pageSize=$pageSize&search=$encSearch&category=$encCategory&sortBy=$encSortBy&sortDirection=$encSortDir&filterDate=$encFilterDate"
             Log.d("MedicalRecordRepo", "Fetching medical records URL: $url")
             val resp = api.getMedicalRecordsByUser(url)
             if (resp.isSuccessful && resp.body()?.isSuccess == true) {
@@ -203,7 +206,9 @@ class MedicalRecordRepository @Inject constructor(
                 val resultText = extractInterpretationText(json)
                 Result.success(resultText)
             } else {
-                Result.failure(Exception("خطا در دریافت تحلیل فایل."))
+                val errBody = resp.errorBody()?.string()
+                val msg = parseErrorMessage(errBody, "خطا در دریافت تحلیل فایل.")
+                Result.failure(Exception(msg))
             }
         } catch (e: Exception) {
             Log.e("MedicalRecordRepo", "getFileInterpretation error", e)
@@ -220,10 +225,42 @@ class MedicalRecordRepository @Inject constructor(
                 val resultText = extractInterpretationText(json)
                 Result.success(resultText)
             } else {
-                Result.failure(Exception("خطا در درخواست تحلیل فایل."))
+                val errBody = resp.errorBody()?.string()
+                val msg = parseErrorMessage(errBody, "خطا در درخواست تحلیل فایل.")
+                Result.failure(Exception(msg))
             }
         } catch (e: Exception) {
             Log.e("MedicalRecordRepo", "interpretFile error", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFilesByEntityId(entityId: String): Result<List<MedicalRecordFileDto>> {
+        return try {
+            val url = "$baseUrl/${ApiConfig.FILES_ENTITY_ID}/$entityId"
+            val resp = api.getFilesByEntityId(url)
+            if (resp.isSuccessful && resp.body()?.isSuccess == true && resp.body()?.data != null) {
+                Result.success(resp.body()!!.data!!)
+            } else {
+                Result.failure(Exception(resp.body()?.message ?: "خطا در دریافت فایل‌های ضمیمه"))
+            }
+        } catch (e: Exception) {
+            Log.e("MedicalRecordRepo", "getFilesByEntityId error", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteFile(fileId: String): Result<Unit> {
+        return try {
+            val url = "$baseUrl/${ApiConfig.FILES}/$fileId"
+            val resp = api.deleteFile(url)
+            if (resp.isSuccessful && resp.body()?.isSuccess == true) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception(resp.body()?.message ?: "خطا در حذف فایل"))
+            }
+        } catch (e: Exception) {
+            Log.e("MedicalRecordRepo", "deleteFile error", e)
             Result.failure(e)
         }
     }
@@ -271,14 +308,31 @@ class MedicalRecordRepository @Inject constructor(
     }
 
     private fun extractInterpretationText(json: kotlinx.serialization.json.JsonElement): String {
-        return if (json is JsonObject) {
-            json["text"]?.jsonPrimitive?.content
-                ?: json["interpretation"]?.jsonPrimitive?.content
-                ?: json["message"]?.jsonPrimitive?.content
-                ?: json.toString()
-        } else {
-            json.toString()
+        if (json is kotlinx.serialization.json.JsonPrimitive) {
+            return json.content
         }
+        if (json is JsonObject) {
+            // Check "data" object or primitive first as per ASP.NET ResponseDto structure
+            val dataElem = json["data"]
+            if (dataElem is kotlinx.serialization.json.JsonPrimitive) {
+                if (dataElem.content.isNotBlank()) return dataElem.content
+            } else if (dataElem is JsonObject) {
+                val dataText = dataElem["text"]?.jsonPrimitive?.contentOrNull
+                    ?: dataElem["interpretation"]?.jsonPrimitive?.contentOrNull
+                    ?: dataElem["content"]?.jsonPrimitive?.contentOrNull
+                if (!dataText.isNullOrBlank()) return dataText
+            }
+
+            // Check top-level "text" or "interpretation"
+            val topText = json["text"]?.jsonPrimitive?.contentOrNull
+                ?: json["interpretation"]?.jsonPrimitive?.contentOrNull
+            if (!topText.isNullOrBlank()) return topText
+
+            // Check "message"
+            val msg = json["message"]?.jsonPrimitive?.contentOrNull
+            if (!msg.isNullOrBlank()) return msg
+        }
+        return json.toString()
     }
 
     private fun parseErrorMessage(errorBodyString: String?, defaultMessage: String): String {

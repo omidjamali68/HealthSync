@@ -27,4 +27,6 @@ object ApiConfig {
     const val MEDICAL_RECORDS_BY_USER = "api/medical-records/by-user"
     const val FILES_INTERPRET_UPLOAD = "api/files/interpret-upload"
     const val FILES_INTERPRETATION = "api/files"
+    const val FILES_ENTITY_ID = "api/files/entity-id"
+    const val FILES = "api/files"
 }

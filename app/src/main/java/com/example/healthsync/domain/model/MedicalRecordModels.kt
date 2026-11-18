@@ -115,8 +115,14 @@ data class MedicalRecordFileDto(
     @Serializable(with = FlexibleStringSerializer::class)
     val fileName: String = "",
     @SerialName("fileUrl")
-    @Serializable(with = FlexibleStringSerializer::class)
-    val fileUrl: String = "",
+    @Serializable(with = FlexibleNullableStringSerializer::class)
+    val fileUrl: String? = null,
+    @SerialName("filePath")
+    @Serializable(with = FlexibleNullableStringSerializer::class)
+    val filePath: String? = null,
+    @SerialName("extension")
+    @Serializable(with = FlexibleNullableStringSerializer::class)
+    val extension: String? = null,
     @SerialName("fileType")
     @Serializable(with = FlexibleNullableStringSerializer::class)
     val fileType: String? = null,

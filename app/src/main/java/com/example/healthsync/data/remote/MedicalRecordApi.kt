@@ -56,4 +56,14 @@ interface MedicalRecordApi {
     suspend fun interpretFile(
         @Url url: String
     ): Response<JsonElement>
+
+    @GET
+    suspend fun getFilesByEntityId(
+        @Url url: String
+    ): Response<ResponseDto<List<MedicalRecordFileDto>>>
+
+    @DELETE
+    suspend fun deleteFile(
+        @Url url: String
+    ): Response<ResponseDto<JsonElement>>
 }

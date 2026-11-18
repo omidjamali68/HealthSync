@@ -1,6 +1,7 @@
 package com.example.healthsync.ui.medicalrecord
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Search
@@ -65,6 +67,7 @@ import com.example.healthsync.domain.model.MedicalRecordFileDto
 import com.example.healthsync.ui.Routes
 import com.example.healthsync.ui.components.AppBottomNavigation
 import com.example.healthsync.util.DateUtils
+import com.example.healthsync.util.DateUtils.toEnglishDigits
 import com.example.healthsync.util.DateUtils.toPersianDigits
 import java.time.Instant
 import java.time.ZoneId
@@ -82,20 +85,66 @@ private fun getCategoryIconAndColor(category: MedicalRecordCategory): Pair<Image
     }
 }
 
+@Composable
+private fun getFileIcon(extension: String?, fileName: String): ImageVector {
+    val ext = (extension ?: fileName.substringAfterLast('.', "")).lowercase()
+    return when {
+        ext in listOf("jpg", "jpeg", "png", "gif", "webp", "bmp") -> Icons.Default.Image
+        ext == "pdf" -> Icons.Default.PictureAsPdf
+        else -> Icons.Default.AttachFile
+    }
+}
+
+fun openFileInExternalViewer(context: Context, baseUrl: String, filePathOrUrl: String?) {
+    if (filePathOrUrl.isNullOrBlank()) {
+        Toast.makeText(context, "آدرس فایل معتبر نیست.", Toast.LENGTH_SHORT).show()
+        return
+    }
+    val fullUrl = if (filePathOrUrl.startsWith("http://") || filePathOrUrl.startsWith("https://")) {
+        filePathOrUrl
+    } else {
+        val cleanBase = baseUrl.trimEnd('/').removeSuffix("/api")
+        val cleanPath = filePathOrUrl.replace("\\", "/").removePrefix("wwwroot/").removePrefix("/")
+        "$cleanBase/$cleanPath"
+    }
+
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(fullUrl))
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        Toast.makeText(context, "امکان باز کردن فایل وجود ندارد.", Toast.LENGTH_SHORT).show()
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PersianDatePickerDialog(
+    initialDateStr: String? = null,
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val (nowYear, nowMonth, nowDay) = remember {
+    val (initYear, initMonth, initDay) = remember(initialDateStr) {
+        if (!initialDateStr.isNullOrBlank()) {
+            val clean = initialDateStr.trim().toEnglishDigits()
+            val parts = clean.split("/", "-")
+            if (parts.size == 3) {
+                val y = parts[0].toIntOrNull()
+                val m = parts[1].toIntOrNull()
+                val d = parts[2].toIntOrNull()
+                if (y != null && m != null && d != null && y in 1300..1500 && m in 1..12 && d in 1..31) {
+                    Triple(y, m, d)
+                } else null
+            } else null
+        } else null
+    } ?: run {
         val zdt = ZonedDateTime.now(ZoneId.of("Asia/Tehran"))
-        DateUtils.gregorianToJalali(zdt.year, zdt.monthValue, zdt.dayOfMonth)
+        val (y, m, d) = DateUtils.gregorianToJalali(zdt.year, zdt.monthValue, zdt.dayOfMonth)
+        Triple(y, m, d)
     }
 
-    var selectedYear by remember { mutableIntStateOf(nowYear) }
-    var selectedMonth by remember { mutableIntStateOf(nowMonth) }
-    var selectedDay by remember { mutableIntStateOf(nowDay) }
+    var selectedYear by remember { mutableIntStateOf(initYear) }
+    var selectedMonth by remember { mutableIntStateOf(initMonth) }
+    var selectedDay by remember { mutableIntStateOf(initDay) }
 
     var yearExpanded by remember { mutableStateOf(false) }
     var monthExpanded by remember { mutableStateOf(false) }
@@ -265,10 +314,19 @@ private fun PersianDatePickerDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GregorianDatePickerDialog(
+    initialDateStr: String? = null,
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val datePickerState = rememberDatePickerState()
+    val initialMillis = remember(initialDateStr) {
+        if (!initialDateStr.isNullOrBlank()) {
+            val gregStr = DateUtils.convertJalaliStringToGregorian(initialDateStr)
+            val zdt = DateUtils.parseIsoToZonedDateTime(gregStr)
+            zdt?.toInstant()?.toEpochMilli()
+        } else null
+    }
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialMillis)
+
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -300,14 +358,146 @@ private fun GregorianDatePickerDialog(
 @Composable
 fun AppDatePickerDialog(
     isPersian: Boolean,
+    initialDateStr: String? = null,
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     if (isPersian) {
-        PersianDatePickerDialog(onDateSelected = onDateSelected, onDismiss = onDismiss)
+        PersianDatePickerDialog(
+            initialDateStr = initialDateStr,
+            onDateSelected = onDateSelected,
+            onDismiss = onDismiss
+        )
     } else {
-        GregorianDatePickerDialog(onDateSelected = onDateSelected, onDismiss = onDismiss)
+        GregorianDatePickerDialog(
+            initialDateStr = initialDateStr,
+            onDateSelected = onDateSelected,
+            onDismiss = onDismiss
+        )
     }
+}
+
+// Modal Dialog for File Interpretation matching _FileInterpretationModal in Razor view
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FileInterpretationModal(
+    fileName: String?,
+    interpretationText: String?,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onReInterpret: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "نتیجه تفسیر فایل با هوش مصنوعی",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (!fileName.isNullOrBlank()) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AttachFile,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = fileName,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+
+                HorizontalDivider()
+
+                if (isLoading) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = "در حال دریافت و تفسیر فایل با هوش مصنوعی…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                } else if (!interpretationText.isNullOrBlank()) {
+                    Text(
+                        text = interpretationText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    Text(
+                        text = "نتیجه تفسیری برای این فایل دریافت نشد.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onReInterpret,
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.re_interpret_file), style = MaterialTheme.typography.labelMedium)
+                }
+
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(stringResource(R.string.close), fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -367,9 +557,20 @@ fun MedicalRecordScreen(
             activeInterpretation = s.activeFileInterpretation,
             interpretationLoading = s.interpretationLoading,
             activeFileId = s.activeFileId,
+            baseUrl = vm.baseUrl,
             onDismiss = { vm.selectRecordDetail(null) },
-            onGetInterpretation = vm::getFileInterpretation,
+            onGetInterpretation = vm::openFileInterpretationModal,
             onReInterpret = vm::reInterpretFile
+        )
+    }
+
+    if (s.showInterpretationModal) {
+        FileInterpretationModal(
+            fileName = s.modalFileName,
+            interpretationText = s.activeFileInterpretation,
+            isLoading = s.interpretationLoading,
+            onDismiss = vm::closeFileInterpretationModal,
+            onReInterpret = vm::reInterpretModalFile
         )
     }
 
@@ -451,6 +652,7 @@ fun MedicalRecordScreen(
                 1 -> MedicalRecordFormSection(
                     state = s,
                     isPersian = isPersian,
+                    baseUrl = vm.baseUrl,
                     onTitleChange = vm::updateFormTitle,
                     onCategoryChange = vm::updateFormCategory,
                     onRecordDateChange = vm::updateFormRecordDate,
@@ -458,8 +660,10 @@ fun MedicalRecordScreen(
                     onDoctorNameChange = vm::updateFormDoctorName,
                     onCenterNameChange = vm::updateFormCenterName,
                     onPickFiles = { filePickerLauncher.launch("*/*") },
-                    onRemoveExistingFile = vm::removeExistingFile,
+                    onRemoveExistingFile = vm::deleteExistingFile,
                     onRemoveSelectedFile = vm::removeSelectedFile,
+                    onGetInterpretation = vm::openFileInterpretationModal,
+                    onReInterpret = vm::reInterpretFile,
                     onClearForm = vm::clearForm,
                     onSubmitForm = vm::submitForm
                 )
@@ -488,6 +692,7 @@ private fun MedicalRecordListSection(
     if (showFilterDatePicker) {
         AppDatePickerDialog(
             isPersian = isPersian,
+            initialDateStr = state.filterDateQuery,
             onDateSelected = { selectedDate ->
                 onFilterDateChange(selectedDate)
             },
@@ -570,7 +775,7 @@ private fun MedicalRecordListSection(
                     ) {
                         HorizontalDivider(color = Color.LightGray.copy(alpha = 0.3f))
 
-                        // Requirement 3 Fix: Category Chips placed ON TOP of Title Search Input
+                        // Category Chips ON TOP
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
                                 text = "فیلتر بر اساس دسته‌بندی:",
@@ -628,7 +833,7 @@ private fun MedicalRecordListSection(
                             )
                         }
 
-                        // Requirement 4 Fix: Filter by Date with Jalali DatePicker Support
+                        // Filter by Date
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
                                 text = stringResource(R.string.filter_date_header_label),
@@ -876,7 +1081,6 @@ private fun MedicalRecordItemCard(
                 )
             }
 
-            // Issue 2 Fix: Clean Pencil & Trash icon buttons.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -898,6 +1102,7 @@ private fun MedicalRecordItemCard(
 private fun MedicalRecordFormSection(
     state: MedicalRecordUiState,
     isPersian: Boolean,
+    baseUrl: String,
     onTitleChange: (String) -> Unit,
     onCategoryChange: (MedicalRecordCategory) -> Unit,
     onRecordDateChange: (String) -> Unit,
@@ -907,6 +1112,8 @@ private fun MedicalRecordFormSection(
     onPickFiles: () -> Unit,
     onRemoveExistingFile: (String) -> Unit,
     onRemoveSelectedFile: (Uri) -> Unit,
+    onGetInterpretation: (String, String) -> Unit,
+    onReInterpret: (String) -> Unit,
     onClearForm: () -> Unit,
     onSubmitForm: () -> Unit
 ) {
@@ -918,6 +1125,7 @@ private fun MedicalRecordFormSection(
     if (showFormDatePicker) {
         AppDatePickerDialog(
             isPersian = isPersian,
+            initialDateStr = state.formRecordDate,
             onDateSelected = { selectedDate ->
                 onRecordDateChange(selectedDate)
             },
@@ -966,7 +1174,7 @@ private fun MedicalRecordFormSection(
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Header Blue Banner matching Website
+                // Header Blue Banner
                 Surface(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.fillMaxWidth()
@@ -1130,7 +1338,7 @@ private fun MedicalRecordFormSection(
                         }
                     }
 
-                    // Field 4: Date (Requirement 4 Fix: Jalali DatePicker Support)
+                    // Field 4: Date
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             text = stringResource(R.string.record_date),
@@ -1159,51 +1367,37 @@ private fun MedicalRecordFormSection(
                         )
                     }
 
-                    // Issue 3 Fix: Display Existing Uploaded Files when Editing
-                    if (state.editingRecordId != null && state.existingFiles.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // Display Existing Uploaded Files when Editing (Matching Razor View filesContainer)
+                    if (state.editingRecordId != null) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                text = "فایل‌های پیوست شده قبلی:",
+                                text = "فایل‌های ضمیمه:",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            state.existingFiles.forEach { file ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(
-                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                                            RoundedCornerShape(8.dp)
+
+                            if (state.existingFiles.isEmpty()) {
+                                Text(
+                                    text = "فایلی ثبت نشده است.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
+                                )
+                            } else {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    state.existingFiles.forEach { file ->
+                                        MedicalRecordFileItem(
+                                            file = file,
+                                            activeFileId = state.activeFileId,
+                                            interpretationLoading = state.interpretationLoading,
+                                            activeInterpretation = if (state.activeFileId == file.id) state.activeFileInterpretation else file.interpretation,
+                                            onFileClick = {
+                                                openFileInExternalViewer(context, baseUrl, file.filePath ?: file.fileUrl)
+                                            },
+                                            onGetInterpretation = { onGetInterpretation(file.id, file.fileName.ifBlank { "فایل ضمیمه" }) },
+                                            onReInterpret = { onReInterpret(file.id) },
+                                            onDeleteFile = { onRemoveExistingFile(file.id) }
                                         )
-                                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.AttachFile,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            text = file.fileName.ifBlank { "فایل سابقه" },
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = { onRemoveExistingFile(file.id) },
-                                        modifier = Modifier.size(24.dp)
-                                    ) {
-                                        Icon(Icons.Default.Clear, contentDescription = "حذف فایل", tint = Color.Red)
                                     }
                                 }
                             }
@@ -1213,7 +1407,7 @@ private fun MedicalRecordFormSection(
                     // Field 5: File Attachment Box (New Uploads)
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = if (state.editingRecordId != null) "افزودن فایل‌های جدید:" else stringResource(R.string.attached_files),
+                            text = if (state.editingRecordId != null) "افزودن فایل جدید:" else stringResource(R.string.attached_files),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -1378,13 +1572,15 @@ private fun MedicalRecordDetailSheet(
     activeInterpretation: String?,
     interpretationLoading: Boolean,
     activeFileId: String?,
+    baseUrl: String,
     onDismiss: () -> Unit,
-    onGetInterpretation: (String) -> Unit,
+    onGetInterpretation: (String, String) -> Unit,
     onReInterpret: (String) -> Unit
 ) {
     val category = MedicalRecordCategory.fromValue(record.category)
     val (icon, color) = getCategoryIconAndColor(category)
     val isPersian = DateUtils.isPersianMode()
+    val context = LocalContext.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -1459,7 +1655,10 @@ private fun MedicalRecordDetailSheet(
                             activeFileId = activeFileId,
                             interpretationLoading = interpretationLoading,
                             activeInterpretation = if (activeFileId == file.id) activeInterpretation else file.interpretation,
-                            onGetInterpretation = { onGetInterpretation(file.id) },
+                            onFileClick = {
+                                openFileInExternalViewer(context, baseUrl, file.filePath ?: file.fileUrl)
+                            },
+                            onGetInterpretation = { onGetInterpretation(file.id, file.fileName.ifBlank { "فایل ضمیمه" }) },
                             onReInterpret = { onReInterpret(file.id) }
                         )
                     }
@@ -1482,14 +1681,19 @@ private fun MedicalRecordFileItem(
     activeFileId: String?,
     interpretationLoading: Boolean,
     activeInterpretation: String?,
+    onFileClick: (() -> Unit)? = null,
     onGetInterpretation: () -> Unit,
-    onReInterpret: () -> Unit
+    onReInterpret: () -> Unit,
+    onDeleteFile: (() -> Unit)? = null
 ) {
     val isCurrentFile = activeFileId == file.id
     val isInterpreting = isCurrentFile && interpretationLoading
+    val fileIcon = getFileIcon(file.extension, file.fileName)
 
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onFileClick != null) Modifier.clickable { onFileClick() } else Modifier),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
     ) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1503,7 +1707,7 @@ private fun MedicalRecordFileItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.AttachFile, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Icon(fileIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                     Text(
                         text = file.fileName.ifBlank { "مدرک پزشکی" },
                         style = MaterialTheme.typography.bodyMedium,
@@ -1513,15 +1717,28 @@ private fun MedicalRecordFileItem(
                     )
                 }
 
-                FilledTonalButton(
-                    onClick = onGetInterpretation,
-                    enabled = !isInterpreting,
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.ai_interpretation), style = MaterialTheme.typography.labelMedium)
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FilledTonalButton(
+                        onClick = onGetInterpretation,
+                        enabled = !isInterpreting,
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.ai_interpretation), style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    if (onDeleteFile != null) {
+                        OutlinedButton(
+                            onClick = onDeleteFile,
+                            shape = RoundedCornerShape(8.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFC62828))
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    }
                 }
             }
 

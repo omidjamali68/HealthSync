@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.healthsync.data.repository.MedicalRecordRepository
 import com.example.healthsync.domain.model.*
+import com.example.healthsync.util.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +45,9 @@ data class MedicalRecordUiState(
     val interpretationLoading: Boolean = false,
     val activeFileInterpretation: String? = null,
     val activeFileId: String? = null,
+    val showInterpretationModal: Boolean = false,
+    val modalFileId: String? = null,
+    val modalFileName: String? = null,
 
     // Feedback messages
     val message: String? = null,
@@ -75,6 +79,7 @@ class MedicalRecordViewModel @Inject constructor(
 
     fun setSelectedCategory(category: MedicalRecordCategory?) {
         _state.value = _state.value.copy(selectedCategory = category)
+        loadRecords(1)
     }
 
     fun setFilterDateQuery(date: String) {
@@ -104,22 +109,25 @@ class MedicalRecordViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
-            val categoryVal = _state.value.selectedCategory?.value?.toString() ?: ""
-            val searchWithCategory = if (categoryVal.isNotBlank()) {
-                "${_state.value.searchQuery} category:$categoryVal".trim()
-            } else {
-                _state.value.searchQuery
-            }
+            val selectedCat = _state.value.selectedCategory
+            val categoryVal = selectedCat?.value?.toString() ?: ""
 
             repository.getMedicalRecordsByUser(
                 page = page,
                 pageSize = _state.value.pageSize,
-                search = searchWithCategory,
+                search = _state.value.searchQuery,
+                category = categoryVal,
                 filterDate = _state.value.filterDateQuery
             ).onSuccess { paged ->
+                val rawItems = paged.items.filterNotNull()
+                val filteredItems = if (selectedCat != null) {
+                    rawItems.filter { it.category == selectedCat.value }
+                } else {
+                    rawItems
+                }
                 _state.value = _state.value.copy(
                     isLoading = false,
-                    records = paged.items.filterNotNull(),
+                    records = filteredItems,
                     currentPage = paged.page.coerceAtLeast(1),
                     pageSize = paged.pageSize,
                     totalCount = paged.totalCount,
@@ -170,17 +178,35 @@ class MedicalRecordViewModel @Inject constructor(
         _state.value = _state.value.copy(selectedFileUris = current)
     }
 
-    fun removeExistingFile(fileId: String) {
-        val current = _state.value.existingFiles.filter { it.id != fileId }
-        _state.value = _state.value.copy(existingFiles = current)
+    fun deleteExistingFile(fileId: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            repository.deleteFile(fileId).onSuccess {
+                val updated = _state.value.existingFiles.filter { it.id != fileId }
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    existingFiles = updated,
+                    message = "فایل با موفقیت حذف شد.",
+                    isSuccessMessage = true
+                )
+            }.onFailure { ex ->
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    message = ex.message ?: "خطا در حذف فایل.",
+                    isSuccessMessage = false
+                )
+            }
+        }
     }
 
     fun prepareEditForm(record: MedicalRecordDto) {
+        val initialDate = formatRecordDateForForm(record.recordDate)
+
         _state.value = _state.value.copy(
             editingRecordId = record.id,
             formTitle = record.title,
             formCategory = MedicalRecordCategory.fromValue(record.category),
-            formRecordDate = record.recordDate ?: "",
+            formRecordDate = initialDate,
             formDescription = record.description ?: "",
             formDoctorName = record.doctorName ?: "",
             formCenterName = record.centerName ?: "",
@@ -189,22 +215,37 @@ class MedicalRecordViewModel @Inject constructor(
             selectedTab = 1
         )
 
-        // Fetch full record details from API to ensure complete files list is populated
+        // Fetch files from api/files/entity-id/{id} matching the web controller!
         viewModelScope.launch {
-            repository.getMedicalRecordById(record.id).onSuccess { fullRecord ->
-                if (_state.value.editingRecordId == record.id) {
-                    _state.value = _state.value.copy(
-                        existingFiles = fullRecord.files,
-                        formTitle = fullRecord.title.ifBlank { _state.value.formTitle },
-                        formCategory = MedicalRecordCategory.fromValue(fullRecord.category),
-                        formRecordDate = fullRecord.recordDate ?: _state.value.formRecordDate,
-                        formDescription = fullRecord.description ?: _state.value.formDescription,
-                        formDoctorName = fullRecord.doctorName ?: _state.value.formDoctorName,
-                        formCenterName = fullRecord.centerName ?: _state.value.formCenterName
-                    )
-                }
+            val filesResult = repository.getFilesByEntityId(record.id)
+            val recordResult = repository.getMedicalRecordById(record.id)
+
+            val fullRecord = recordResult.getOrNull()
+            val fetchedFiles = filesResult.getOrNull()
+                ?: fullRecord?.files
+                ?: record.files
+
+            val apiDate = formatRecordDateForForm(fullRecord?.recordDate)
+
+            if (_state.value.editingRecordId == record.id) {
+                _state.value = _state.value.copy(
+                    existingFiles = fetchedFiles,
+                    formRecordDate = if (apiDate.isNotBlank()) apiDate else _state.value.formRecordDate,
+                    formTitle = fullRecord?.title?.ifBlank { _state.value.formTitle } ?: _state.value.formTitle,
+                    formDescription = fullRecord?.description ?: _state.value.formDescription,
+                    formDoctorName = fullRecord?.doctorName ?: _state.value.formDoctorName,
+                    formCenterName = fullRecord?.centerName ?: _state.value.formCenterName
+                )
             }
         }
+    }
+
+    private fun formatRecordDateForForm(rawDate: String?): String {
+        if (rawDate.isNullOrBlank()) return ""
+        val isPersian = DateUtils.isPersianMode()
+        if (rawDate.contains("/") && !rawDate.contains("-")) return rawDate
+        val formatted = DateUtils.formatIsoDateTime(rawDate, isPersian = isPersian)
+        return formatted.split(" ").firstOrNull() ?: rawDate
     }
 
     fun clearForm() {
@@ -217,7 +258,8 @@ class MedicalRecordViewModel @Inject constructor(
             formDoctorName = "",
             formCenterName = "",
             existingFiles = emptyList(),
-            selectedFileUris = emptyList()
+            selectedFileUris = emptyList(),
+            selectedTab = 0
         )
     }
 
@@ -368,6 +410,34 @@ class MedicalRecordViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    val baseUrl: String
+        get() = repository.baseUrl
+
+    fun openFileInterpretationModal(fileId: String, fileName: String) {
+        _state.value = _state.value.copy(
+            showInterpretationModal = true,
+            modalFileId = fileId,
+            modalFileName = fileName,
+            activeFileId = fileId,
+            activeFileInterpretation = null,
+            interpretationLoading = true
+        )
+        getFileInterpretation(fileId)
+    }
+
+    fun closeFileInterpretationModal() {
+        _state.value = _state.value.copy(
+            showInterpretationModal = false,
+            modalFileId = null,
+            modalFileName = null
+        )
+    }
+
+    fun reInterpretModalFile() {
+        val fileId = _state.value.modalFileId ?: return
+        reInterpretFile(fileId)
     }
 
     fun clearMessage() {
