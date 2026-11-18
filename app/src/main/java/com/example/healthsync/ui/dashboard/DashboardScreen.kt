@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.FormatListNumbered
@@ -187,7 +188,22 @@ fun DashboardScreen(
                     )
                     StatusItemRow(
                         icon = Icons.Default.FormatListNumbered,
-                        label = stringResource(R.string.pending_batches_label, s.queueSize)
+                        label = stringResource(R.string.pending_batches_label, s.queueSize),
+                        trailingContent = if (s.queueSize > 0) {
+                            {
+                                IconButton(
+                                    onClick = vm::clearQueue,
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Brush,
+                                        contentDescription = stringResource(R.string.clear_queue),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        } else null
                     )
                     StatusItemRow(
                         icon = Icons.Default.AccessTime,
@@ -222,13 +238,6 @@ fun DashboardScreen(
                 ) {
                     Text(stringResource(R.string.send_test_data))
                 }
-            }
-
-            TextButton(
-                onClick = vm::clearQueue,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.clear_queue), color = MaterialTheme.colorScheme.error)
             }
 
             Text(
@@ -294,24 +303,34 @@ fun DashboardScreen(
 @Composable
 private fun StatusItemRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String
+    label: String,
+    trailingContent: (@Composable () -> Unit)? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        if (trailingContent != null) {
+            trailingContent()
+        }
     }
 }
 
