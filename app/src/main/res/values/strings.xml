@@ -48,6 +48,7 @@
     <string name="sync_now">همگام‌سازی اکنون</string>
     <string name="send_test_data">ارسال دیتای تست (همه پارامترها)</string>
     <string name="clear_queue">پاکسازی صف انتظار</string>
+    <string name="clear_action">پاک‌سازی</string>
     <string name="recent_activity">فعالیت‌های اخیر</string>
     <string name="success">موفقیت‌آمیز</string>
     <string name="failed">ناموفق</string>

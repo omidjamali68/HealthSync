@@ -54,7 +54,11 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
                 onOpenPermissions = { navController.navigate(Routes.PERMISSIONS) },
                 onNavigateToRoute = { targetRoute ->
                     if (targetRoute != Routes.DASHBOARD) {
-                        navController.navigate(targetRoute)
+                        navController.navigate(targetRoute) {
+                            popUpTo(Routes.DASHBOARD) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 },
                 onLogout = {
@@ -66,12 +70,30 @@ fun NavGraph(navController: NavHostController, startDestination: String = Routes
         }
         composable(Routes.HEALTH_RECORD) {
             HealthRecordScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToRoute = { targetRoute ->
+                    if (targetRoute != Routes.HEALTH_RECORD) {
+                        navController.navigate(targetRoute) {
+                            popUpTo(Routes.DASHBOARD) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
             )
         }
         composable(Routes.MEDICAL_RECORD) {
             MedicalRecordScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToRoute = { targetRoute ->
+                    if (targetRoute != Routes.MEDICAL_RECORD) {
+                        navController.navigate(targetRoute) {
+                            popUpTo(Routes.DASHBOARD) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
             )
         }
     }

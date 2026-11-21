@@ -48,6 +48,7 @@
     <string name="sync_now">Sync now</string>
     <string name="send_test_data">Send test data (all parameters)</string>
     <string name="clear_queue">Clear pending queue</string>
+    <string name="clear_action">Clear</string>
     <string name="recent_activity">Recent activity</string>
     <string name="success">Success</string>
     <string name="failed">Failed</string>

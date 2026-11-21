@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Brush
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.FormatListNumbered
@@ -191,15 +191,24 @@ fun DashboardScreen(
                         label = stringResource(R.string.pending_batches_label, s.queueSize),
                         trailingContent = if (s.queueSize > 0) {
                             {
-                                IconButton(
-                                    onClick = vm::clearQueue,
-                                    modifier = Modifier.size(24.dp)
+                                Row(
+                                    modifier = Modifier
+                                        .clickable(onClick = vm::clearQueue)
+                                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.Brush,
+                                        imageVector = Icons.Default.CleaningServices,
                                         contentDescription = stringResource(R.string.clear_queue),
                                         tint = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.clear_action),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }

@@ -69,18 +69,18 @@ fun AppBottomNavigation(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .navigationBarsPadding(),
-        shape = RoundedCornerShape(32.dp),
-        color = Color(0xFFF1F5F9), // Light modern pill background like screenshot
-        tonalElevation = 4.dp,
-        shadowElevation = 8.dp,
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFFF1F5F9), // Light modern pill background
+        tonalElevation = 2.dp,
+        shadowElevation = 4.dp,
         border = BorderStroke(1.dp, Color(0xFFE2E8F0))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 3.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -107,7 +107,7 @@ fun AppBottomNavigation(
 
                 Column(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
@@ -116,31 +116,31 @@ fun AppBottomNavigation(
                                 onNavigate(item.route)
                             }
                         }
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(14.dp))
                             .background(activeBackgroundColor)
-                            .padding(horizontal = 18.dp, vertical = 6.dp),
+                            .padding(horizontal = 12.dp, vertical = 3.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = if (isSelected) item.activeIcon else item.inactiveIcon,
                             contentDescription = stringResource(item.labelRes),
                             tint = iconColor,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
 
                     Text(
                         text = stringResource(item.labelRes),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                         ),
                         color = textColor
